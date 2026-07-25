@@ -67,6 +67,11 @@ body {
     background: rgba(255,255,255,0.05);
 }
 
+.nav-link.active {
+    color: #e0e0e0;
+    background: rgba(255,255,255,0.08);
+}
+
 .dropdown {
     position: relative;
     display: inline-block;
