@@ -52,7 +52,7 @@ class Handler(BaseHTTPRequestHandler):
             files = []
             if os.path.exists(samples_dir):
                 for f in os.listdir(samples_dir):
-                    if f.endswith(".asm"):
+                    if f.endswith(".asm") or f.endswith(".rsc"):
                         with open(os.path.join(samples_dir, f), "r", encoding="utf-8") as fh:
                             files.append({"name": f, "content": fh.read()})
             result = json.dumps(files)
