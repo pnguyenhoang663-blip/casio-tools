@@ -17,14 +17,50 @@ MIME_MAP = {
 class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         path = urllib.parse.unquote(self.path)
+        parsed = urllib.parse.urlparse(self.path)
+        params = urllib.parse.parse_qs(parsed.query)
+        callback = params.get("callback", [None])[0]
+
         if path == "/":
             self.serve(os.path.join(BASE_DIR, "index.html"))
         elif path.startswith("/compiler"):
             rel = path[len("/compiler"):].lstrip("/") or "index.html"
             self.serve(os.path.join(BASE_DIR, "compiler", rel))
-        elif path.startswith("/rac/"):
-            rel = path[len("/rac/"):]
-            self.serve(os.path.join(BASE_DIR, rel))
+        elif path.startswith("/raw-file/"):
+            parts = path.split("/")
+            if len(parts) >= 4:
+                model = parts[2]
+                filename = "/".join(parts[3:]).split("?")[0]
+                fp = os.path.join(BASE_DIR, model, filename)
+                if os.path.isfile(fp):
+                    with open(fp, "r", encoding="utf-8") as f:
+                        content = f.read()
+                    if callback:
+                        content = callback + "(" + json.dumps(content) + ");"
+                    self.send_response(200)
+                    self.send_header("Content-Type", "application/javascript" if callback else "text/plain")
+                    self.end_headers()
+                    self.wfile.write(content.encode())
+                else:
+                    self.send_error(404)
+            else:
+                self.send_error(400)
+        elif path.startswith("/samples/"):
+            model = path.split("/")[2].split("?")[0] if len(path.split("/")) > 2 else "580vnx"
+            samples_dir = os.path.join(BASE_DIR, "asm_ropchain")
+            files = []
+            if os.path.exists(samples_dir):
+                for f in os.listdir(samples_dir):
+                    if f.endswith(".asm"):
+                        with open(os.path.join(samples_dir, f), "r", encoding="utf-8") as fh:
+                            files.append({"name": f, "content": fh.read()})
+            result = json.dumps(files)
+            if callback:
+                result = callback + "(" + result + ");"
+            self.send_response(200)
+            self.send_header("Content-Type", "application/javascript" if callback else "application/json")
+            self.end_headers()
+            self.wfile.write(result.encode())
         else:
             clean = path.lstrip("/")
             for folder in [BASE_DIR, os.path.join(BASE_DIR, "compiler")]:
