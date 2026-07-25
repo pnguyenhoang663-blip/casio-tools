@@ -3,6 +3,7 @@ import json
 import sys
 import tempfile
 import urllib.parse
+import subprocess
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -85,71 +86,25 @@ class Handler(BaseHTTPRequestHandler):
             callback = data.get("cb", "cb")
 
             try:
-                # Import compiler modules
-                from libcompiler import loader, handlers, utils, engine, extensions
+                # Write code to temp file
+                tmp = tempfile.NamedTemporaryFile(suffix=".rsc", delete=False, dir=BASE_DIR)
+                tmp.write(code.encode("utf-8"))
+                tmp_name = tmp.name
+                tmp.close()
 
-                # Reset state
-                loader.labels.clear()
-                loader.global_labels.clear()
-                loader.section_addresses.clear()
-                loader.label_sections.clear()
-                loader.aliases.clear()
-                loader.result.clear()
-                loader.vars_dict.clear()
-                loader.commands.clear()
-                loader.datalabels.clear()
-                loader.disasm.clear()
-                loader.deferred_evals.clear()
-                loader.address_requests.clear()
-                loader.relocation_expressions.clear()
-                loader.sizeof_cmds.clear()
-                loader.dist_cmds.clear()
-                loader.pr_org_cmds.clear()
-                loader.pr_backup_cmds.clear()
-                loader.dynamic_macros.clear()
-                loader.defined_functions.clear()
-                utils._default_diagnostics.reset()
+                cmd = [sys.executable, os.path.join(BASE_DIR, "rac.py")]
+                cmd.extend(["-l", "vi_VN", model, os.path.basename(tmp_name)])
+                res = subprocess.run(cmd, capture_output=True, text=True, cwd=BASE_DIR, encoding="utf-8")
 
-                # Load config
-                config_path = os.path.join(BASE_DIR, model, "config.json")
-                with open(config_path, "r", encoding="utf-8") as f:
-                    config = json.load(f)
+                try: os.remove(tmp_name)
+                except: pass
 
-                # Load keywords
-                kw_path = os.path.join(BASE_DIR, "libcompiler", "keyword.txt")
-                if os.path.exists(kw_path):
-                    with open(kw_path, "r", encoding="utf-8") as f:
-                        utils.setKeywords(f.read().splitlines())
-
-                # Load model files
-                gadgets_path = os.path.join(BASE_DIR, model, config["gadgets_file"])
-                labels_path = os.path.join(BASE_DIR, model, config["labels_file"])
-                with open(gadgets_path, "r", encoding="utf-8") as f:
-                    gadgets_text = f.read()
-                with open(labels_path, "r", encoding="utf-8") as f:
-                    labels_text = f.read()
-
-                loader.char_to_hex.update(config.get("char_to_hex", {}))
-                loader.token_to_hex.update(config.get("token_to_hex", {}))
-                handlers.init_handlers()
-                loader.parse_commands(gadgets_text, labels_text)
-
-                # Parse extensions
-                ext_path = os.path.join(BASE_DIR, model, config.get("extensions_file", "extensions.txt"))
-                ext_list = []
-                if os.path.exists(ext_path):
-                    with open(ext_path, "r", encoding="utf-8") as f:
-                        ext_list = extensions.parse_extensions(f.read())
-
-                # Expand extensions in code
-                program = extensions.expand_extensions_in_program(code.split('\n'), ext_list)
-
-                # Run compiler
-                overflow_sp = config["overflow_initial_sp"]
-                results = engine.process_program(program, overflow_sp)
-
-                output = results.get("output", "")
-                response = {"output": output, "notes": "", "returncode": 0, "bytes_count": len(output.split()) if output else 0}
+                response = {
+                    "output": res.stdout,
+                    "notes": res.stderr or "",
+                    "returncode": res.returncode,
+                    "bytes_count": len(res.stdout.split()) if res.stdout else 0,
+                }
             except Exception as e:
                 import traceback
                 response = {"error": traceback.format_exc()}
