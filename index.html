@@ -6,7 +6,7 @@
     <title>Casio Tools</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="style.css">
-    <script>document.addEventListener('DOMContentLoaded',()=>{const p=window.location.pathname;document.querySelectorAll('.nav-link').forEach(a=>{if(a.getAttribute('href')&&p.includes(a.getAttribute('href').replace('../','')))a.classList.add('active')})})</script>
+    <script>document.addEventListener('DOMContentLoaded',()=>{const p=window.location.pathname;const onTool=p.includes('compiler')||p.includes('pixel');document.querySelectorAll('.nav-link').forEach(a=>{if(a.getAttribute('href')&&p.includes(a.getAttribute('href').replace('../','')))a.classList.add('active')});if(onTool)document.querySelector('.dropbtn')?.classList.add('active')})</script>
 </head>
 <body>
     <nav class="navbar">
