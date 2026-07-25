@@ -3,494 +3,395 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pixel Tools</title>
+    <title>Pixel Tools - Casio</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
             --bg: #1e1e1e; --bg2: #252526; --bg3: #2d2d2d; --bg4: #333;
-            --border: #3e3e42; --text: #ccc; --text2: #888;
-            --accent: #007acc; --font: 'Consolas', monospace;
-            --font-ui: 'Segoe UI', system-ui, sans-serif;
+            --border: #3e3e42; --text: #ccc; --text2: #888; --accent: #007acc;
+            --font: 'Consolas', monospace; --font-ui: 'Segoe UI', system-ui, sans-serif;
         }
         body { font-family: var(--font-ui); background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; }
-        .topbar { display: flex; align-items: center; padding: 0 12px; height: 40px; background: var(--bg2); border-bottom: 1px solid var(--border); gap: 0; flex-shrink: 0; }
-        .topbar .tab { padding: 8px 18px; cursor: pointer; font-size: 13px; color: var(--text2); border-bottom: 2px solid transparent; transition: all 0.15s; }
+        .topbar { display: flex; align-items: center; padding: 0 12px; height: 40px; background: var(--bg2); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+        .topbar .tab { padding: 8px 16px; cursor: pointer; font-size: 13px; color: var(--text2); border-bottom: 2px solid transparent; transition: all 0.15s; }
         .topbar .tab:hover { color: var(--text); background: var(--bg3); }
         .topbar .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
         .topbar .spacer { flex: 1; }
-        .topbar .exit-btn { padding: 6px 12px; cursor: pointer; color: var(--red, #f44747); font-size: 13px; border-radius: 4px; }
+        .topbar .exit-btn { padding: 6px 12px; cursor: pointer; color: #f44747; font-size: 13px; border-radius: 4px; }
         .topbar .exit-btn:hover { background: var(--bg3); }
         .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
         .panel { display: none; flex: 1; flex-direction: column; overflow: hidden; }
         .panel.active { display: flex; }
+
+        /* Image Tab */
+        .image-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; gap: 16px; }
+        .upload-box { border: 2px dashed var(--border); border-radius: 12px; padding: 30px 40px; text-align: center; cursor: pointer; transition: all 0.2s; }
+        .upload-box:hover { border-color: var(--accent); background: var(--bg2); }
+        .upload-box i { font-size: 40px; color: var(--text2); margin-bottom: 10px; }
+        .upload-box p { font-size: 14px; color: var(--text2); }
+        .preview-section { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; justify-content: center; }
+        .preview-section canvas { image-rendering: pixelated; border: 1px solid var(--border); background: #111; }
+        .hex-result { max-width: 600px; width: 100%; }
+        .hex-result .hdr { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; background: var(--bg2); border: 1px solid var(--border); border-radius: 6px 6px 0 0; font-size: 12px; }
+        .hex-result .hdr span { color: var(--text2); }
+        .hex-result .hdr .cp { cursor: pointer; color: var(--accent); }
+        .hex-result .hdr .cp:hover { text-decoration: underline; }
+        .hex-result .body { padding: 10px; font-family: var(--font); font-size: 11px; color: #ce9178; background: var(--bg); border: 1px solid var(--border); border-top: none; border-radius: 0 0 6px 6px; max-height: 200px; overflow: auto; word-break: break-all; user-select: text; }
+
+        /* Sub tabs */
+        .sub-bar { display: flex; background: var(--bg2); border-bottom: 1px solid var(--border); flex-shrink: 0; padding-left: 8px; }
+        .sub-bar .subtab { padding: 6px 14px; cursor: pointer; font-size: 12px; color: var(--text2); border-bottom: 2px solid transparent; transition: all 0.15s; }
+        .sub-bar .subtab:hover { color: var(--text); }
+        .sub-bar .subtab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+        /* Toolbar */
         .tool-row { display: flex; align-items: center; gap: 6px; padding: 6px 12px; background: var(--bg2); border-bottom: 1px solid var(--border); flex-shrink: 0; flex-wrap: wrap; }
         .tool-row label { font-size: 12px; color: var(--text2); }
-        .tool-btn { padding: 4px 10px; background: var(--bg3); border: 1px solid var(--border); border-radius: 4px; color: var(--text); cursor: pointer; font-size: 12px; font-family: var(--font-ui); transition: all 0.15s; }
+        .tool-btn { padding: 5px 12px; background: var(--bg3); border: 1px solid var(--border); border-radius: 4px; color: var(--text); cursor: pointer; font-size: 12px; font-family: var(--font-ui); transition: all 0.15s; }
         .tool-btn:hover { background: var(--bg4); border-color: var(--accent); }
         .tool-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
         .tool-btn.danger { color: #f44747; }
         .tool-btn.active { background: var(--accent); color: #fff; }
-        .tool-input { padding: 3px 6px; background: var(--bg3); color: var(--text); border: 1px solid var(--border); border-radius: 3px; font-size: 12px; width: 50px; outline: none; font-family: var(--font); }
+        .tool-input { padding: 3px 6px; background: var(--bg3); color: var(--text); border: 1px solid var(--border); border-radius: 3px; font-size: 12px; outline: none; font-family: var(--font); width: 50px; }
         .tool-input:focus { border-color: var(--accent); }
-        .tool-select { padding: 3px 6px; background: var(--bg3); color: var(--text); border: 1px solid var(--border); border-radius: 3px; font-size: 12px; outline: none; }
         .sep { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
-        .content-area { flex: 1; display: flex; overflow: hidden; }
+
+        /* Editor */
+        .edit-body { flex: 1; display: flex; overflow: hidden; }
         .canvas-wrap { flex: 1; display: flex; align-items: center; justify-content: center; overflow: auto; padding: 12px; background: var(--bg); }
-        .canvas-wrap canvas { image-rendering: pixelated; border: 1px solid var(--border); }
-        .hex-panel { width: 320px; display: flex; flex-direction: column; border-left: 1px solid var(--border); background: var(--bg2); flex-shrink: 0; }
-        .hex-panel .hdr { padding: 6px 10px; font-size: 11px; color: var(--text2); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
-        .hex-panel .hdr .cp { cursor: pointer; color: var(--accent); }
-        .hex-panel .hdr .cp:hover { text-decoration: underline; }
-        .hex-area { flex: 1; padding: 8px 10px; font-family: var(--font); font-size: 11px; overflow: auto; white-space: pre; color: #ce9178; user-select: text; }
-        .preview-wrap { display: flex; align-items: center; justify-content: center; padding: 12px; background: var(--bg); flex: 1; }
-        .preview-wrap canvas { image-rendering: pixelated; border: 1px solid var(--border); }
-        .upload-area { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 20px; border: 2px dashed var(--border); border-radius: 8px; cursor: pointer; margin: 12px; }
-        .upload-area:hover { border-color: var(--accent); }
-        .grid-wrap { flex: 1; display: flex; align-items: center; justify-content: center; overflow: auto; padding: 12px; background: var(--bg); }
-        .grid-wrap canvas { image-rendering: pixelated; border: 1px solid var(--border); cursor: crosshair; }
-        .draw-canvas { cursor: crosshair; }
+        .canvas-wrap canvas { image-rendering: pixelated; border: 1px solid var(--border); cursor: crosshair; }
+        .side-panel { width: 280px; display: flex; flex-direction: column; border-left: 1px solid var(--border); background: var(--bg2); flex-shrink: 0; }
+        .side-panel .hdr { padding: 6px 10px; font-size: 11px; color: var(--text2); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
+        .side-panel .hdr .cp { cursor: pointer; color: var(--accent); }
+        .side-panel .hdr .cp:hover { text-decoration: underline; }
+        .side-panel .body { flex: 1; padding: 8px 10px; font-family: var(--font); font-size: 11px; overflow: auto; white-space: pre; color: #ce9178; user-select: text; }
+
+        /* Line draw */
+        .line-info { padding: 4px 12px; font-size: 12px; color: var(--text2); text-align: center; background: var(--bg2); border-top: 1px solid var(--border); }
+
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: var(--bg2); }
         ::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 3px; }
-        .preview-upload { max-width: 192px; max-height: 63px; display: none; }
-        .split-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-        .split-image-area { flex: 1; display: flex; overflow: hidden; }
-        .split-image-area .left-preview { flex: 1; display: flex; align-items: center; justify-content: center; padding: 12px; }
-        .line-preview { position: relative; }
-        .line-coords { padding: 4px 10px; font-size: 12px; color: var(--text2); text-align: center; background: var(--bg2); border-top: 1px solid var(--border); }
+
+        @media (max-width: 768px) {
+            .side-panel { width: 180px; }
+            .edit-body { flex-direction: column; }
+            .side-panel { width: 100%; border-left: none; border-top: 1px solid var(--border); }
+        }
     </style>
 </head>
 <body>
     <div class="topbar">
-        <div class="tab active" data-tab="image" onclick="switchTab('image')"><i class="fas fa-image"></i> Dịch ảnh</div>
-        <div class="tab" data-tab="bitmap" onclick="switchTab('bitmap')"><i class="fas fa-vector-square"></i> Bitmap</div>
-        <div class="tab" data-tab="pixel" onclick="switchTab('pixel')"><i class="fas fa-pencil-alt"></i> Pixel</div>
-        <div class="tab" data-tab="line" onclick="switchTab('line')"><i class="fas fa-slash"></i> Line draw</div>
+        <div class="tab" data-tab="image" onclick="switchTab('image')"><i class="fas fa-image"></i> Dịch Ảnh</div>
+        <div class="tab active" data-tab="draw" onclick="switchTab('draw')"><i class="fas fa-pencil-alt"></i> Vẽ Pixel</div>
         <div class="spacer"></div>
         <div class="exit-btn" onclick="window.location.href='../index.html'"><i class="fas fa-times"></i> Thoát</div>
     </div>
 
     <div class="main">
-        <!-- === TAB 1: Dịch ảnh === -->
-        <div class="panel active" id="panel-image">
-            <div class="tool-row">
-                <button class="tool-btn primary" onclick="document.getElementById('imgInput').click()"><i class="fas fa-upload"></i> Tải ảnh</button>
-                <input type="file" id="imgInput" accept="image/*" style="display:none" onchange="loadImage(event)">
-                <span class="sep"></span>
-                <label>Rộng:</label> <input class="tool-input" id="imgW" value="192" onchange="regenImage()">
-                <label>Cao:</label> <input class="tool-input" id="imgH" value="63" onchange="regenImage()">
-                <button class="tool-btn" onclick="regenImage()"><i class="fas fa-sync"></i> Tạo lại</button>
-                <span class="sep"></span>
-                <label>Threshold:</label> <input class="tool-input" id="threshold" value="128" style="width:40px" onchange="regenImage()">
-            </div>
-            <div class="split-image-area">
-                <div class="left-preview" id="imagePreview"><canvas id="previewCanvas"></canvas></div>
-                <div class="hex-panel">
-                    <div class="hdr"><span>Hex output</span><span class="cp" onclick="copyHex()"><i class="fas fa-copy"></i> Copy</span></div>
-                    <div class="hex-area" id="imageHex">Chưa có ảnh</div>
+        <!-- === DỊCH ẢNH === -->
+        <div class="panel" id="panel-image">
+            <div class="image-body">
+                <div class="upload-box" onclick="document.getElementById('imgInput').click()">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p><strong>Tải ảnh lên</strong></p>
+                    <p style="font-size:11px">Hỗ trợ: PNG, JPG, BMP (sẽ resize về 192×63)</p>
+                    <input type="file" id="imgInput" accept="image/*" style="display:none" onchange="loadImage(event)">
+                </div>
+                <div class="preview-section">
+                    <canvas id="previewCanvas" width="192" height="63"></canvas>
+                    <div class="hex-result">
+                        <div class="hdr"><span>Output: 192 × 63 pixels</span><span class="cp" onclick="copyImageHex()"><i class="fas fa-copy"></i> SAO CHÉP MÃ HEX</span></div>
+                        <div class="body" id="imageHex">Chưa có ảnh</div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- === TAB 2: Bitmap === -->
-        <div class="panel" id="panel-bitmap">
-            <div class="tool-row">
-                <label>Rộng:</label> <input class="tool-input" id="bmpW" value="24" onchange="initBitmap()">
-                <label>Cao:</label> <input class="tool-input" id="bmpH" value="16" onchange="initBitmap()">
-                <label>Zoom:</label> <input class="tool-input" id="bmpZoom" value="16" style="width:40px" onchange="initBitmap()">
-                <span class="sep"></span>
-                <button class="tool-btn" onclick="initBitmap()"><i class="fas fa-plus"></i> Tạo</button>
-                <button class="tool-btn danger" onclick="clearBitmap()"><i class="fas fa-trash"></i> Xóa</button>
-                <button class="tool-btn" onclick="undoBitmap()"><i class="fas fa-undo"></i> Hoàn tác</button>
-                <button class="tool-btn primary active" id="bmpMode" onclick="toggleBmpMode()"><i class="fas fa-pen"></i> Vẽ</button>
+        <!-- === VẼ PIXEL === -->
+        <div class="panel active" id="panel-draw">
+            <div class="sub-bar">
+                <div class="subtab active" data-sub="bitmap" onclick="switchSub('bitmap')">🗺️ Bitmap</div>
+                <div class="subtab" data-sub="pixel" onclick="switchSub('pixel')">🖌️ Pixel</div>
+                <div class="subtab" data-sub="line" onclick="switchSub('line')">📏 Line Draw</div>
             </div>
-            <div class="content-area">
-                <div class="grid-wrap"><canvas id="bmpCanvas"></canvas></div>
-                <div class="hex-panel">
-                    <div class="hdr"><span>Hex output</span><span class="cp" onclick="copyHexBmp()"><i class="fas fa-copy"></i> Copy</span></div>
-                    <div class="hex-area" id="bmpHex"></div>
-                </div>
-            </div>
-        </div>
 
-        <!-- === TAB 3: Pixel === -->
-        <div class="panel" id="panel-pixel">
-            <div class="tool-row">
-                <label>Rộng:</label> <input class="tool-input" id="pxW" value="24" onchange="initPixel()">
-                <label>Cao:</label> <input class="tool-input" id="pxH" value="16" onchange="initPixel()">
-                <label>Zoom:</label> <input class="tool-input" id="pxZoom" value="16" style="width:40px" onchange="initPixel()">
-                <span class="sep"></span>
-                <button class="tool-btn" onclick="initPixel()"><i class="fas fa-plus"></i> Tạo</button>
-                <button class="tool-btn" onclick="document.getElementById('pxImgInput').click()"><i class="fas fa-upload"></i> Tải ảnh</button>
-                <input type="file" id="pxImgInput" accept="image/*" style="display:none" onchange="loadPixelImage(event)">
-                <button class="tool-btn danger" onclick="clearPixel()"><i class="fas fa-trash"></i> Xóa</button>
-                <button class="tool-btn primary active" id="pxMode" onclick="togglePxMode()"><i class="fas fa-pen"></i> Vẽ</button>
-                <span class="sep"></span>
-                <button class="tool-btn" onclick="undoPixel()"><i class="fas fa-undo"></i> Hoàn tác</button>
-            </div>
-            <div class="content-area">
-                <div class="grid-wrap"><canvas id="pxCanvas"></canvas></div>
-                <div class="hex-panel">
-                    <div class="hdr"><span>Hex output</span><span class="cp" onclick="copyHexPx()"><i class="fas fa-copy"></i> Copy</span></div>
-                    <div class="hex-area" id="pxHex"></div>
+            <!-- BITMAP -->
+            <div class="sub-panel" id="sub-bitmap" style="display:flex;flex:1;flex-direction:column;overflow:hidden;">
+                <div class="tool-row">
+                    <label>Rộng:</label> <input class="tool-input" id="bmpW" value="24">
+                    <label>Cao:</label> <input class="tool-input" id="bmpH" value="16">
+                    <label>Zoom:</label> <input class="tool-input" id="bmpZoom" value="16" style="width:40px">
+                    <span class="sep"></span>
+                    <button class="tool-btn" onclick="bmpInit()"><i class="fas fa-plus"></i> Tạo</button>
+                    <button class="tool-btn danger" onclick="bmpClear()"><i class="fas fa-trash"></i> Xoá</button>
+                    <button class="tool-btn primary active" id="bmpModeBtn" onclick="bmpToggleMode()"><i class="fas fa-pen"></i> Vẽ</button>
+                    <button class="tool-btn" onclick="bmpUndo()"><i class="fas fa-undo"></i> ↩️</button>
+                </div>
+                <div class="edit-body">
+                    <div class="canvas-wrap"><canvas id="bmpCanvas"></canvas></div>
+                    <div class="side-panel">
+                        <div class="hdr"><span>HEX</span><span class="cp" onclick="bmpCopyHex()"><i class="fas fa-copy"></i> 📋 SAO CHÉP HEX</span></div>
+                        <div class="body" id="bmpHex"></div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- === TAB 4: Line draw === -->
-        <div class="panel" id="panel-line">
-            <div class="tool-row">
-                <label>Zoom:</label> <input class="tool-input" id="lineZoom" value="8" style="width:40px" onchange="initLineDraw()">
-                <span class="sep"></span>
-                <button class="tool-btn danger" onclick="clearLine()"><i class="fas fa-trash"></i> Xóa</button>
-                <button class="tool-btn" onclick="undoLine()"><i class="fas fa-undo"></i> Hoàn tác</button>
-                <span class="sep"></span>
-                <label>Kéo để vẽ line</label>
-            </div>
-            <div class="content-area">
-                <div class="grid-wrap"><canvas id="lineCanvas" class="draw-canvas"></canvas></div>
-                <div class="hex-panel">
-                    <div class="hdr"><span>ROP output</span><span class="cp" onclick="copyLineRop()"><i class="fas fa-copy"></i> Copy</span></div>
-                    <div class="hex-area" id="lineHex"></div>
+            <!-- PIXEL -->
+            <div class="sub-panel" id="sub-pixel" style="display:none;flex:1;flex-direction:column;overflow:hidden;">
+                <div class="tool-row">
+                    <label>RỘNG:</label> <input class="tool-input" id="pxW" value="24">
+                    <label>CAO:</label> <input class="tool-input" id="pxH" value="16">
+                    <label>ZOOM:</label> <input class="tool-input" id="pxZoom" value="16" style="width:40px">
+                    <span class="sep"></span>
+                    <button class="tool-btn" onclick="pxInit()"><i class="fas fa-plus"></i> Tạo</button>
+                    <button class="tool-btn" onclick="document.getElementById('pxImgInput').click()"><i class="fas fa-upload"></i> Tải ảnh</button>
+                    <input type="file" id="pxImgInput" accept="image/*" style="display:none" onchange="pxLoadImage(event)">
+                    <button class="tool-btn danger" onclick="pxClear()"><i class="fas fa-trash"></i> Xoá</button>
+                    <button class="tool-btn primary active" id="pxModeBtn" onclick="pxToggleMode()"><i class="fas fa-pen"></i> Vẽ</button>
+                    <button class="tool-btn" onclick="pxUndo()"><i class="fas fa-undo"></i> ↩️</button>
                 </div>
+                <div class="edit-body">
+                    <div class="canvas-wrap"><canvas id="pxCanvas"></canvas></div>
+                    <div class="side-panel">
+                        <div class="hdr"><span>HEX</span><span class="cp" onclick="pxCopyCmd()"><i class="fas fa-copy"></i> 📋 SAO CHÉP</span></div>
+                        <div class="body" id="pxHex"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LINE DRAW -->
+            <div class="sub-panel" id="sub-line" style="display:none;flex:1;flex-direction:column;overflow:hidden;">
+                <div class="tool-row">
+                    <label>Zoom:</label> <input class="tool-input" id="lineZoom" value="8" style="width:40px">
+                    <span class="sep"></span>
+                    <button class="tool-btn danger" onclick="lineClear()"><i class="fas fa-trash"></i> Xoá</button>
+                    <button class="tool-btn" onclick="lineUndo()"><i class="fas fa-undo"></i> ↩️</button>
+                    <span style="color:var(--text2);font-size:12px;margin-left:8px">Kéo để vẽ line</span>
+                </div>
+                <div class="edit-body">
+                    <div class="canvas-wrap"><canvas id="lineCanvas" class="draw-canvas"></canvas></div>
+                    <div class="side-panel">
+                        <div class="hdr"><span>ROP</span><span class="cp" onclick="lineCopy()"><i class="fas fa-copy"></i> 📋 SAO CHÉP</span></div>
+                        <div class="body" id="lineHex">Kéo chuột để vẽ line</div>
+                    </div>
+                </div>
+                <div class="line-info" id="lineInfo">192×63 | Kéo chuột để vẽ đường thẳng</div>
             </div>
         </div>
     </div>
 
 <script>
-// ===== UTILS =====
-const HEX_CHARS = '0123456789ABCDEF';
-function byteToHex(b) { return HEX_CHARS[(b>>4)&15] + HEX_CHARS[b&15]; }
-function toHex(bytes) { return bytes.map(byteToHex).join(' '); }
+// === UTILITIES ===
+const HEX = '0123456789ABCDEF';
+function toHex(bytes) { return bytes.map(b => HEX[(b>>4)&15] + HEX[b&15]).join(' '); }
 
-// ===== TAB SWITCHING =====
+// === TAB SWITCHING ===
 function switchTab(name) {
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.topbar .tab').forEach(t => t.classList.remove('active'));
     document.getElementById('panel-' + name).classList.add('active');
-    document.querySelector('.topbar .tab[data-tab="' + name + '"]').classList.add('active');
+    document.querySelector(`.topbar .tab[data-tab="${name}"]`).classList.add('active');
 }
 
-// ===== IMAGE TO HEX =====
-let imgData = null;
+function switchSub(name) {
+    document.querySelectorAll('.sub-panel').forEach(p => p.style.display = 'none');
+    document.querySelectorAll('.subtab').forEach(t => t.classList.remove('active'));
+    document.getElementById('sub-' + name).style.display = 'flex';
+    document.querySelector(`.subtab[data-sub="${name}"]`).classList.add('active');
+    if (name === 'bitmap') bmpInit();
+    if (name === 'pixel') pxInit();
+    if (name === 'line') lineInit();
+}
+
+// ===== DỊCH ẢNH =====
+let _imgData = null;
 function loadImage(e) {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
     reader.onload = function(ev) {
         const img = new Image();
-        img.onload = function() { imgData = img; regenImage(); };
+        img.onload = function() { _imgData = img; convertImage(); };
         img.src = ev.target.result;
     };
     reader.readAsDataURL(file);
 }
 
-function regenImage() {
+function convertImage() {
+    if (!_imgData) return;
     const canvas = document.getElementById('previewCanvas');
-    const w = parseInt(document.getElementById('imgW').value) || 192;
-    const h = parseInt(document.getElementById('imgH').value) || 63;
-    const thresh = parseInt(document.getElementById('threshold').value) || 128;
-    canvas.width = w; canvas.height = h;
+    canvas.width = 192; canvas.height = 63;
     const ctx = canvas.getContext('2d');
-
-    if (!imgData) {
-        ctx.fillStyle = '#111'; ctx.fillRect(0, 0, w, h);
-        document.getElementById('imageHex').textContent = 'Tải ảnh lên trước';
-        return;
-    }
-
-    ctx.drawImage(imgData, 0, 0, w, h);
-    const imageData = ctx.getImageData(0, 0, w, h);
+    ctx.drawImage(_imgData, 0, 0, 192, 63);
+    const imageData = ctx.getImageData(0, 0, 192, 63);
     const pixels = imageData.data;
-
-    // Convert to 1-bit per pixel, packed into bytes (MSB first)
     const bytes = [];
-    for (let y = 0; y < h; y++) {
-        for (let x = 0; x < w; x += 8) {
+
+    for (let y = 0; y < 63; y++) {
+        for (let x = 0; x < 192; x += 8) {
             let byte = 0;
             for (let b = 0; b < 8; b++) {
-                const px = x + b;
-                if (px >= w) continue;
-                const idx = (y * w + px) * 4;
+                if (x + b >= 192) continue;
+                const idx = (y * 192 + x + b) * 4;
                 const gray = pixels[idx] * 0.299 + pixels[idx+1] * 0.587 + pixels[idx+2] * 0.114;
-                if (gray < thresh) byte |= (1 << (7 - b)); // black pixel = 1
+                if (gray < 128) byte |= (1 << (7 - b));
             }
             bytes.push(byte);
         }
     }
 
-    // Render preview (black/white)
-    for (let y = 0; y < h; y++) {
-        for (let x = 0; x < w; x++) {
-            const byteIdx = y * Math.ceil(w / 8) + Math.floor(x / 8);
-            const bitIdx = 7 - (x % 8);
-            const isBlack = (bytes[byteIdx] >> bitIdx) & 1;
-            const idx = (y * w + x) * 4;
-            const val = isBlack ? 0 : 255;
-            pixels[idx] = val; pixels[idx+1] = val; pixels[idx+2] = val; pixels[idx+3] = 255;
+    // Render B/W preview
+    for (let y = 0; y < 63; y++) {
+        for (let x = 0; x < 192; x++) {
+            const byteIdx = y * 24 + Math.floor(x / 8);
+            const on = (bytes[byteIdx] >> (7 - (x % 8))) & 1;
+            const idx = (y * 192 + x) * 4;
+            const val = on ? 0 : 255;
+            pixels[idx] = val; pixels[idx+1] = val; pixels[idx+2] = val;
         }
     }
     ctx.putImageData(imageData, 0, 0);
-
-    // Show hex
-    const hexStr = bytes.map(byteToHex).join(' ');
-    document.getElementById('imageHex').textContent = hexStr;
+    document.getElementById('imageHex').textContent = toHex(bytes);
 }
 
-function copyHex() {
-    const text = document.getElementById('imageHex').textContent;
-    if (text && text !== 'Chưa có ảnh') {
-        navigator.clipboard.writeText(text).catch(()=>{});
-    }
+function copyImageHex() {
+    const t = document.getElementById('imageHex').textContent;
+    if (t && t !== 'Chưa có ảnh') navigator.clipboard.writeText(t.replace(/\s/g, ' ')).catch(()=>{});
 }
 
-// ===== BITMAP EDITOR =====
-let bmpData = []; let bmpHistory = []; let bmpMode = 'draw';
-function initBitmap() {
-    const w = parseInt(document.getElementById('bmpW').value) || 24;
-    const h = parseInt(document.getElementById('bmpH').value) || 16;
-    const zoom = parseInt(document.getElementById('bmpZoom').value) || 16;
+// ===== BITMAP =====
+let bmpD = [], bmpH = [], bmpMode = 'draw';
+function bmpInit() {
+    const w = +document.getElementById('bmpW').value || 24, h = +document.getElementById('bmpH').value || 16, z = +document.getElementById('bmpZoom').value || 16;
     if (w < 1 || w > 192 || h < 1 || h > 63) return;
-
-    if (bmpData.length === 0) {
-        bmpData = new Uint8Array(h * Math.ceil(w / 8));
-        bmpHistory = [new Uint8Array(bmpData)];
-    }
-
+    if (!bmpD.length) { bmpD = new Uint8Array(h * Math.ceil(w/8)); bmpH = [new Uint8Array(bmpD)]; }
     const canvas = document.getElementById('bmpCanvas');
-    canvas.width = w * zoom; canvas.height = h * zoom;
-    const ctx = canvas.getContext('2d');
-    renderBmp(ctx, w, h, zoom);
-    updateBmpHex(w, h);
-
-    canvas.onmousedown = function(e) { startBmpDraw(e, w, h, zoom); };
-    canvas.onmousemove = function(e) { moveBmpDraw(e, w, h, zoom); };
-    canvas.onmouseup = function() { endBmpDraw(w, h); };
-    canvas.onmouseleave = function() { endBmpDraw(w, h); };
+    canvas.width = w * z; canvas.height = h * z;
+    bmpRender(w, h, z);
+    bmpUpdateHex(w, h);
+    canvas.onmousedown = e => bmpStart(e, w, h, z);
+    canvas.onmousemove = e => bmpMove(e, w, h, z);
+    canvas.onmouseup = () => bmpEnd(w, h);
+    canvas.onmouseleave = () => bmpEnd(w, h);
 }
 
-function renderBmp(ctx, w, h, zoom) {
-    const byteW = Math.ceil(w / 8);
-    for (let y = 0; y < h; y++) {
-        for (let x = 0; x < w; x++) {
-            const byteIdx = y * byteW + Math.floor(x / 8);
-            const bitIdx = 7 - (x % 8);
-            const on = (bmpData[byteIdx] >> bitIdx) & 1;
-            ctx.fillStyle = on ? '#fff' : '#111';
-            ctx.fillRect(x * zoom, y * zoom, zoom, zoom);
-        }
-    }
-    // Grid lines
-    ctx.strokeStyle = '#333';
-    ctx.lineWidth = 0.5;
-    for (let x = 0; x <= w; x++) { ctx.beginPath(); ctx.moveTo(x*zoom,0); ctx.lineTo(x*zoom,h*zoom); ctx.stroke(); }
-    for (let y = 0; y <= h; y++) { ctx.beginPath(); ctx.moveTo(0,y*zoom); ctx.lineTo(w*zoom,y*zoom); ctx.stroke(); }
-}
-
-function toggleBmpMode() {
-    bmpMode = bmpMode === 'draw' ? 'erase' : 'draw';
-    document.getElementById('bmpMode').innerHTML = '<i class="fas fa-' + (bmpMode === 'draw' ? 'pen' : 'eraser') + '"></i> ' + (bmpMode === 'draw' ? 'Vẽ' : 'Xóa');
-    document.getElementById('bmpMode').classList.toggle('primary', bmpMode === 'draw');
-}
-
-let bmpDrawing = false;
-function startBmpDraw(e, w, h, zoom) {
-    bmpDrawing = true;
-    const rect = e.target.getBoundingClientRect();
-    const x = Math.floor((e.clientX - rect.left) / zoom);
-    const y = Math.floor((e.clientY - rect.top) / zoom);
-    if (x < 0 || x >= w || y < 0 || y >= h) return;
-    const byteW = Math.ceil(w / 8);
-    const byteIdx = y * byteW + Math.floor(x / 8);
-    const bitIdx = 7 - (x % 8);
-    if (bmpMode === 'draw') bmpData[byteIdx] |= (1 << bitIdx);
-    else bmpData[byteIdx] &= ~(1 << bitIdx);
-    const ctx = e.target.getContext('2d');
-    const on = (bmpData[byteIdx] >> bitIdx) & 1;
-    ctx.fillStyle = on ? '#fff' : '#111';
-    ctx.fillRect(x * zoom, y * zoom, zoom, zoom);
-}
-
-function moveBmpDraw(e, w, h, zoom) {
-    if (!bmpDrawing) return;
-    startBmpDraw(e, w, h, zoom);
-}
-
-function endBmpDraw(w, h) {
-    if (!bmpDrawing) return;
-    bmpDrawing = false;
-    bmpHistory.push(new Uint8Array(bmpData));
-    if (bmpHistory.length > 50) bmpHistory.shift();
-    updateBmpHex(w, h);
-}
-
-function clearBitmap() {
-    const w = parseInt(document.getElementById('bmpW').value) || 24;
-    const h = parseInt(document.getElementById('bmpH').value) || 16;
-    bmpData = new Uint8Array(h * Math.ceil(w / 8));
-    bmpHistory = [new Uint8Array(bmpData)];
-    initBitmap();
-}
-
-function undoBitmap() {
-    if (bmpHistory.length > 1) {
-        bmpHistory.pop();
-        bmpData = new Uint8Array(bmpHistory[bmpHistory.length - 1]);
-        const w = parseInt(document.getElementById('bmpW').value) || 24;
-        const h = parseInt(document.getElementById('bmpH').value) || 16;
-        const zoom = parseInt(document.getElementById('bmpZoom').value) || 16;
-        const canvas = document.getElementById('bmpCanvas');
-        const ctx = canvas.getContext('2d');
-        renderBmp(ctx, w, h, zoom);
-        updateBmpHex(w, h);
-    }
-}
-
-function updateBmpHex(w, h) {
-    const hexStr = toHex(Array.from(bmpData));
-    document.getElementById('bmpHex').textContent = hexStr;
-}
-
-function copyHexBmp() {
-    const text = document.getElementById('bmpHex').textContent;
-    if (text) navigator.clipboard.writeText(text).catch(()=>{});
-}
-
-// ===== PIXEL EDITOR (similar to bitmap with image load) =====
-let pxData = []; let pxHistory = []; let pxMode = 'draw';
-function initPixel() {
-    const w = parseInt(document.getElementById('pxW').value) || 24;
-    const h = parseInt(document.getElementById('pxH').value) || 16;
-    const zoom = parseInt(document.getElementById('pxZoom').value) || 16;
-    if (w < 1 || w > 192 || h < 1 || h > 63) return;
-
-    if (pxData.length === 0) {
-        pxData = new Uint8Array(h * Math.ceil(w / 8));
-        pxHistory = [new Uint8Array(pxData)];
-    }
-
-    const canvas = document.getElementById('pxCanvas');
-    canvas.width = w * zoom; canvas.height = h * zoom;
-    const ctx = canvas.getContext('2d');
-    renderPx(ctx, w, h, zoom);
-    updatePxHex(w, h);
-
-    canvas.onmousedown = function(e) { startPxDraw(e, w, h, zoom); };
-    canvas.onmousemove = function(e) { movePxDraw(e, w, h, zoom); };
-    canvas.onmouseup = function() { endPxDraw(w, h); };
-    canvas.onmouseleave = function() { endPxDraw(w, h); };
-}
-
-function renderPx(ctx, w, h, zoom) {
-    const byteW = Math.ceil(w / 8);
-    for (let y = 0; y < h; y++) {
-        for (let x = 0; x < w; x++) {
-            const byteIdx = y * byteW + Math.floor(x / 8);
-            const bitIdx = 7 - (x % 8);
-            const on = (pxData[byteIdx] >> bitIdx) & 1;
-            ctx.fillStyle = on ? '#fff' : '#111';
-            ctx.fillRect(x * zoom, y * zoom, zoom, zoom);
-        }
+function bmpRender(w, h, z) {
+    const ctx = document.getElementById('bmpCanvas').getContext('2d');
+    const bw = Math.ceil(w/8);
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+        const on = (bmpD[y * bw + Math.floor(x/8)] >> (7 - x%8)) & 1;
+        ctx.fillStyle = on ? '#fff' : '#111';
+        ctx.fillRect(x*z, y*z, z, z);
     }
     ctx.strokeStyle = '#333'; ctx.lineWidth = 0.5;
-    for (let x = 0; x <= w; x++) { ctx.beginPath(); ctx.moveTo(x*zoom,0); ctx.lineTo(x*zoom,h*zoom); ctx.stroke(); }
-    for (let y = 0; y <= h; y++) { ctx.beginPath(); ctx.moveTo(0,y*zoom); ctx.lineTo(w*zoom,y*zoom); ctx.stroke(); }
+    for (let x = 0; x <= w; x++) { ctx.beginPath(); ctx.moveTo(x*z,0); ctx.lineTo(x*z,h*z); ctx.stroke(); }
+    for (let y = 0; y <= h; y++) { ctx.beginPath(); ctx.moveTo(0,y*z); ctx.lineTo(w*z,y*z); ctx.stroke(); }
 }
 
-function togglePxMode() {
-    pxMode = pxMode === 'draw' ? 'erase' : 'draw';
-    document.getElementById('pxMode').innerHTML = '<i class="fas fa-' + (pxMode === 'draw' ? 'pen' : 'eraser') + '"></i> ' + (pxMode === 'draw' ? 'Vẽ' : 'Xóa');
-    document.getElementById('pxMode').classList.toggle('primary', pxMode === 'draw');
+function bmpToggleMode() {
+    bmpMode = bmpMode === 'draw' ? 'erase' : 'draw';
+    const btn = document.getElementById('bmpModeBtn');
+    btn.innerHTML = bmpMode === 'draw' ? '<i class="fas fa-pen"></i> Vẽ' : '<i class="fas fa-eraser"></i> Xoá';
+    btn.classList.toggle('primary', bmpMode === 'draw');
 }
 
-let pxDrawing = false;
-function startPxDraw(e, w, h, zoom) {
-    pxDrawing = true;
-    const rect = e.target.getBoundingClientRect();
-    const x = Math.floor((e.clientX - rect.left) / zoom);
-    const y = Math.floor((e.clientY - rect.top) / zoom);
+let _bmpD = false;
+function bmpStart(e, w, h, z) { _bmpD = true; bmpPaint(e, w, h, z); }
+function bmpMove(e, w, h, z) { if (_bmpD) bmpPaint(e, w, h, z); }
+function bmpEnd(w, h) { if (!_bmpD) return; _bmpD = false; bmpH.push(new Uint8Array(bmpD)); if (bmpH.length > 50) bmpH.shift(); bmpUpdateHex(w, h); }
+
+function bmpPaint(e, w, h, z) {
+    const r = e.target.getBoundingClientRect(), x = Math.floor((e.clientX - r.left)/z), y = Math.floor((e.clientY - r.top)/z);
     if (x < 0 || x >= w || y < 0 || y >= h) return;
-    const byteW = Math.ceil(w / 8);
-    const byteIdx = y * byteW + Math.floor(x / 8);
-    const bitIdx = 7 - (x % 8);
-    if (pxMode === 'draw') pxData[byteIdx] |= (1 << bitIdx);
-    else pxData[byteIdx] &= ~(1 << bitIdx);
+    const bw = Math.ceil(w/8), bi = y * bw + Math.floor(x/8), bt = 7 - x%8;
+    if (bmpMode === 'draw') bmpD[bi] |= (1 << bt); else bmpD[bi] &= ~(1 << bt);
     const ctx = e.target.getContext('2d');
-    const on = (pxData[byteIdx] >> bitIdx) & 1;
-    ctx.fillStyle = on ? '#fff' : '#111';
-    ctx.fillRect(x * zoom, y * zoom, zoom, zoom);
+    ctx.fillStyle = (bmpD[bi] >> bt) & 1 ? '#fff' : '#111';
+    ctx.fillRect(x*z, y*z, z, z);
 }
 
-function movePxDraw(e, w, h, zoom) { if (pxDrawing) startPxDraw(e, w, h, zoom); }
-function endPxDraw(w, h) {
-    if (!pxDrawing) return;
-    pxDrawing = false;
-    pxHistory.push(new Uint8Array(pxData));
-    if (pxHistory.length > 50) pxHistory.shift();
-    updatePxHex(w, h);
+function bmpClear() { const w = +document.getElementById('bmpW').value||24, h = +document.getElementById('bmpH').value||16; bmpD = new Uint8Array(h * Math.ceil(w/8)); bmpH = [new Uint8Array(bmpD)]; bmpInit(); }
+function bmpUndo() { if (bmpH.length > 1) { bmpH.pop(); bmpD = new Uint8Array(bmpH[bmpH.length-1]); bmpInit(); } }
+function bmpUpdateHex(w, h) { document.getElementById('bmpHex').textContent = toHex(Array.from(bmpD)); }
+function bmpCopyHex() { navigator.clipboard.writeText(document.getElementById('bmpHex').textContent).catch(()=>{}); }
+
+// ===== PIXEL =====
+let pxD = [], pxH = [], pxMode = 'draw';
+function pxInit() {
+    const w = +document.getElementById('pxW').value||24, h = +document.getElementById('pxH').value||16, z = +document.getElementById('pxZoom').value||16;
+    if (w < 1 || w > 192 || h < 1 || h > 63) return;
+    if (!pxD.length) { pxD = new Uint8Array(h * Math.ceil(w/8)); pxH = [new Uint8Array(pxD)]; }
+    const canvas = document.getElementById('pxCanvas');
+    canvas.width = w * z; canvas.height = h * z;
+    pxRender(w, h, z);
+    pxUpdateHex(w, h);
+    canvas.onmousedown = e => pxStart(e, w, h, z);
+    canvas.onmousemove = e => pxMove(e, w, h, z);
+    canvas.onmouseup = () => pxEnd(w, h);
+    canvas.onmouseleave = () => pxEnd(w, h);
 }
 
-function clearPixel() {
-    const w = parseInt(document.getElementById('pxW').value) || 24;
-    const h = parseInt(document.getElementById('pxH').value) || 16;
-    pxData = new Uint8Array(h * Math.ceil(w / 8));
-    pxHistory = [new Uint8Array(pxData)];
-    initPixel();
-}
-
-function undoPixel() {
-    if (pxHistory.length > 1) {
-        pxHistory.pop();
-        pxData = new Uint8Array(pxHistory[pxHistory.length - 1]);
-        const w = parseInt(document.getElementById('pxW').value) || 24;
-        const h = parseInt(document.getElementById('pxH').value) || 16;
-        const zoom = parseInt(document.getElementById('pxZoom').value) || 16;
-        const canvas = document.getElementById('pxCanvas');
-        const ctx = canvas.getContext('2d');
-        renderPx(ctx, w, h, zoom);
-        updatePxHex(w, h);
+function pxRender(w, h, z) {
+    const ctx = document.getElementById('pxCanvas').getContext('2d');
+    const bw = Math.ceil(w/8);
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+        const on = (pxD[y * bw + Math.floor(x/8)] >> (7 - x%8)) & 1;
+        ctx.fillStyle = on ? '#fff' : '#111';
+        ctx.fillRect(x*z, y*z, z, z);
     }
+    ctx.strokeStyle = '#333'; ctx.lineWidth = 0.5;
+    for (let x = 0; x <= w; x++) { ctx.beginPath(); ctx.moveTo(x*z,0); ctx.lineTo(x*z,h*z); ctx.stroke(); }
+    for (let y = 0; y <= h; y++) { ctx.beginPath(); ctx.moveTo(0,y*z); ctx.lineTo(w*z,y*z); ctx.stroke(); }
 }
 
-function updatePxHex(w, h) {
-    document.getElementById('pxHex').textContent = toHex(Array.from(pxData));
+function pxToggleMode() {
+    pxMode = pxMode === 'draw' ? 'erase' : 'draw';
+    const btn = document.getElementById('pxModeBtn');
+    btn.innerHTML = pxMode === 'draw' ? '<i class="fas fa-pen"></i> Vẽ' : '<i class="fas fa-eraser"></i> Tẩy';
+    btn.classList.toggle('primary', pxMode === 'draw');
 }
 
-function copyHexPx() {
-    const text = document.getElementById('pxHex').textContent;
-    if (text) navigator.clipboard.writeText(text).catch(()=>{});
+let _pxD = false;
+function pxStart(e, w, h, z) { _pxD = true; pxPaint(e, w, h, z); }
+function pxMove(e, w, h, z) { if (_pxD) pxPaint(e, w, h, z); }
+function pxEnd(w, h) { if (!_pxD) return; _pxD = false; pxH.push(new Uint8Array(pxD)); if (pxH.length > 50) pxH.shift(); pxUpdateHex(w, h); }
+
+function pxPaint(e, w, h, z) {
+    const r = e.target.getBoundingClientRect(), x = Math.floor((e.clientX - r.left)/z), y = Math.floor((e.clientY - r.top)/z);
+    if (x < 0 || x >= w || y < 0 || y >= h) return;
+    const bw = Math.ceil(w/8), bi = y * bw + Math.floor(x/8), bt = 7 - x%8;
+    if (pxMode === 'draw') pxD[bi] |= (1 << bt); else pxD[bi] &= ~(1 << bt);
+    const ctx = e.target.getContext('2d');
+    ctx.fillStyle = (pxD[bi] >> bt) & 1 ? '#fff' : '#111';
+    ctx.fillRect(x*z, y*z, z, z);
 }
 
-function loadPixelImage(e) {
+function pxClear() { const w = +document.getElementById('pxW').value||24, h = +document.getElementById('pxH').value||16; pxD = new Uint8Array(h * Math.ceil(w/8)); pxH = [new Uint8Array(pxD)]; pxInit(); }
+function pxUndo() { if (pxH.length > 1) { pxH.pop(); pxD = new Uint8Array(pxH[pxH.length-1]); pxInit(); } }
+function pxUpdateHex(w, h) { document.getElementById('pxHex').textContent = toHex(Array.from(pxD)); }
+function pxCopyCmd() { navigator.clipboard.writeText(document.getElementById('pxHex').textContent).catch(()=>{}); }
+
+function pxLoadImage(e) {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
     reader.onload = function(ev) {
         const img = new Image();
         img.onload = function() {
-            const w = parseInt(document.getElementById('pxW').value) || 24;
-            const h = parseInt(document.getElementById('pxH').value) || 16;
-            const offscreen = document.createElement('canvas');
-            offscreen.width = w; offscreen.height = h;
-            const octx = offscreen.getContext('2d');
-            octx.drawImage(img, 0, 0, w, h);
-            const imageData = octx.getImageData(0, 0, w, h);
-            const pixels = imageData.data;
-
-            const byteW = Math.ceil(w / 8);
-            pxData = new Uint8Array(h * byteW);
-            for (let y = 0; y < h; y++) {
-                for (let x = 0; x < w; x++) {
-                    const idx = (y * w + x) * 4;
-                    const gray = pixels[idx] * 0.299 + pixels[idx+1] * 0.587 + pixels[idx+2] * 0.114;
-                    const byteIdx = y * byteW + Math.floor(x / 8);
-                    const bitIdx = 7 - (x % 8);
-                    if (gray < 128) pxData[byteIdx] |= (1 << bitIdx);
-                }
+            const w = +document.getElementById('pxW').value||24, h = +document.getElementById('pxH').value||16;
+            const c = document.createElement('canvas'); c.width = w; c.height = h;
+            const ctx = c.getContext('2d'); ctx.drawImage(img, 0, 0, w, h);
+            const d = ctx.getImageData(0, 0, w, h).data;
+            const bw = Math.ceil(w/8);
+            pxD = new Uint8Array(h * bw);
+            for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+                const i = (y * w + x) * 4, g = d[i]*0.299 + d[i+1]*0.587 + d[i+2]*0.114;
+                if (g < 128) pxD[y * bw + Math.floor(x/8)] |= (1 << (7 - x%8));
             }
-            pxHistory = [new Uint8Array(pxData)];
-            initPixel();
+            pxH = [new Uint8Array(pxD)];
+            pxInit();
         };
         img.src = ev.target.result;
     };
@@ -499,126 +400,46 @@ function loadPixelImage(e) {
 }
 
 // ===== LINE DRAW =====
-let lineHistory = []; let linePixels = []; let lineDrawing = false; let lineStart = null;
-function initLineDraw() {
-    const zoom = parseInt(document.getElementById('lineZoom').value) || 8;
-    const w = 192, h = 63;
-    const canvas = document.getElementById('lineCanvas');
-    canvas.width = w * zoom; canvas.height = h * zoom;
-    if (linePixels.length === 0) { linePixels = new Array(h).fill(null).map(() => new Array(w).fill(false)); lineHistory = []; }
-    renderLine(zoom);
-    updateLineRop();
-
-    canvas.onmousedown = function(e) { startLine(e, zoom); };
-    canvas.onmousemove = function(e) { moveLine(e, zoom); };
-    canvas.onmouseup = function() { endLine(); };
-    canvas.onmouseleave = function() { endLine(); };
+let lP = [], lH = [], lD = false, lS = null;
+function lineInit() {
+    const z = +document.getElementById('lineZoom').value || 8;
+    const c = document.getElementById('lineCanvas'); c.width = 192*z; c.height = 63*z;
+    if (!lP.length) { lP = Array.from({length:63}, () => Array(192).fill(false)); lH = []; }
+    lineRender(z);
+    c.onmousedown = e => { lD = true; const r = c.getBoundingClientRect(); lS = {x:Math.max(0,Math.min(191,Math.floor((e.clientX-r.left)/z))), y:Math.max(0,Math.min(62,Math.floor((e.clientY-r.top)/z)))}; lH.push(lP.map(r=>[...r])); if(lH.length>50)lH.shift(); };
+    c.onmousemove = e => { if (!lD || !lS) return; const r = c.getBoundingClientRect(), x = Math.max(0,Math.min(191,Math.floor((e.clientX-r.left)/z))), y = Math.max(0,Math.min(62,Math.floor((e.clientY-r.top)/z))); lP = lH[lH.length-1].map(r=>[...r]); drawLine(lS.x,lS.y,x,y); lineRender(z); document.getElementById('lineHex').textContent = `${lS.x}:${lS.y} > ${x}:${y}`; };
+    c.onmouseup = () => { if (!lD) return; lD = false; lS = null; lineGenRop(); };
+    c.onmouseleave = () => { if (!lD) return; lD = false; lS = null; lineGenRop(); };
+    lineGenRop();
 }
 
-function renderLine(zoom) {
-    const canvas = document.getElementById('lineCanvas');
-    const ctx = canvas.getContext('2d');
-    const w = 192, h = 63;
-    for (let y = 0; y < h; y++) {
-        for (let x = 0; x < w; x++) {
-            ctx.fillStyle = linePixels[y][x] ? '#fff' : '#111';
-            ctx.fillRect(x * zoom, y * zoom, zoom, zoom);
-        }
-    }
+function drawLine(x1,y1,x2,y2) {
+    const dx=Math.abs(x2-x1), dy=Math.abs(y2-y1), sx=x1<x2?1:-1, sy=y1<y2?1:-1;
+    let err=dx-dy;
+    while(true) { if(x1>=0&&x1<192&&y1>=0&&y1<63) lP[y1][x1]=true; if(x1===x2&&y1===y2) break; const e2=2*err; if(e2>-dy){err-=dy;x1+=sx;} if(e2<dx){err+=dx;y1+=sy;} }
+}
+
+function lineRender(z) {
+    const ctx = document.getElementById('lineCanvas').getContext('2d');
+    for (let y = 0; y < 63; y++) for (let x = 0; x < 192; x++) { ctx.fillStyle = lP[y][x] ? '#fff' : '#111'; ctx.fillRect(x*z, y*z, z, z); }
     ctx.strokeStyle = '#333'; ctx.lineWidth = 0.5;
-    for (let x = 0; x <= w; x++) { ctx.beginPath(); ctx.moveTo(x*zoom,0); ctx.lineTo(x*zoom,h*zoom); ctx.stroke(); }
-    for (let y = 0; y <= h; y++) { ctx.beginPath(); ctx.moveTo(0,y*zoom); ctx.lineTo(w*zoom,y*zoom); ctx.stroke(); }
+    for (let x = 0; x <= 192; x++) { ctx.beginPath(); ctx.moveTo(x*z,0); ctx.lineTo(x*z,63*z); ctx.stroke(); }
+    for (let y = 0; y <= 63; y++) { ctx.beginPath(); ctx.moveTo(0,y*z); ctx.lineTo(192*z,y*z); ctx.stroke(); }
 }
 
-function drawLineOnGrid(x1, y1, x2, y2) {
-    const dx = Math.abs(x2 - x1), dy = Math.abs(y2 - y1);
-    const sx = x1 < x2 ? 1 : -1, sy = y1 < y2 ? 1 : -1;
-    let err = dx - dy;
-    while (true) {
-        if (x1 >= 0 && x1 < 192 && y1 >= 0 && y1 < 63) linePixels[y1][x1] = true;
-        if (x1 === x2 && y1 === y2) break;
-        const e2 = 2 * err;
-        if (e2 > -dy) { err -= dy; x1 += sx; }
-        if (e2 < dx) { err += dx; y1 += sy; }
-    }
+function lineClear() { lP = Array.from({length:63}, () => Array(192).fill(false)); lH = []; lineInit(); }
+function lineUndo() { if (lH.length) { lP = lH.pop().map(r=>[...r]); lineInit(); } }
+
+function lineGenRop() {
+    let r = '';
+    for (let y = 0; y < 63; y++) for (let x = 0; x < 192; x++) if (lP[y][x]) r += x + ':' + y + ' ';
+    document.getElementById('lineHex').textContent = r || 'Kéo chuột để vẽ line';
 }
 
-function startLine(e, zoom) {
-    lineDrawing = true;
-    const rect = e.target.getBoundingClientRect();
-    const x = Math.floor((e.clientX - rect.left) / zoom);
-    const y = Math.floor((e.clientY - rect.top) / zoom);
-    lineStart = { x: Math.max(0, Math.min(191, x)), y: Math.max(0, Math.min(62, y)) };
-    // Save state
-    lineHistory.push(linePixels.map(row => [...row]));
-    if (lineHistory.length > 50) lineHistory.shift();
-}
+function lineCopy() { const t = document.getElementById('lineHex').textContent; if (t && !t.includes('Kéo')) navigator.clipboard.writeText(t).catch(()=>{}); }
 
-function moveLine(e, zoom) {
-    if (!lineDrawing || !lineStart) return;
-    const rect = e.target.getBoundingClientRect();
-    const x = Math.max(0, Math.min(191, Math.floor((e.clientX - rect.left) / zoom)));
-    const y = Math.max(0, Math.min(62, Math.floor((e.clientY - rect.top) / zoom)));
-
-    // Restore to history
-    linePixels = lineHistory[lineHistory.length - 1].map(row => [...row]);
-    drawLineOnGrid(lineStart.x, lineStart.y, x, y);
-    document.getElementById('lineHex').textContent = lineStart.x + ':' + lineStart.y + ' > ' + x + ':' + y;
-    renderLine(zoom);
-}
-
-function endLine() {
-    if (!lineDrawing) return;
-    lineDrawing = false;
-    lineStart = null;
-    updateLineRop();
-}
-
-function clearLine() {
-    linePixels = new Array(63).fill(null).map(() => new Array(192).fill(false));
-    lineHistory = [];
-    const zoom = parseInt(document.getElementById('lineZoom').value) || 8;
-    renderLine(zoom);
-    document.getElementById('lineHex').textContent = '';
-}
-
-function undoLine() {
-    if (lineHistory.length > 0) {
-        linePixels = lineHistory.pop().map(row => [...row]);
-        const zoom = parseInt(document.getElementById('lineZoom').value) || 8;
-        renderLine(zoom);
-        updateLineRop();
-    }
-}
-
-function updateLineRop() {
-    const lines = [];
-    // Convert pixel grid back to lines (simplified: just show pixel coords)
-    let output = '';
-    for (let y = 0; y < 63; y++) {
-        for (let x = 0; x < 192; x++) {
-            if (linePixels[y][x]) {
-                // Find connected pixels to form a line
-                output += x + ':' + y + ' ';
-            }
-        }
-    }
-    if (!output) output = 'Vẽ line bằng cách kéo chuột';
-    document.getElementById('lineHex').textContent = output;
-}
-
-function copyLineRop() {
-    const text = document.getElementById('lineHex').textContent;
-    if (text && !text.includes('Vẽ line')) navigator.clipboard.writeText(text).catch(()=>{});
-}
-
-// Init
-document.addEventListener('DOMContentLoaded', () => {
-    regenImage();
-    initBitmap();
-    initPixel();
-    initLineDraw();
-});
+// === INIT ===
+document.addEventListener('DOMContentLoaded', () => { bmpInit(); pxInit(); lineInit(); });
 </script>
 </body>
 </html>
