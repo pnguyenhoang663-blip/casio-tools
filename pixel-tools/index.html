@@ -7,7 +7,10 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Segoe UI',sans-serif;background:#f5f5f5;color:#333}
+body{font-family:'Segoe UI',sans-serif;background:#f5f5f5;color:#333;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.content{animation:slideUp .25s ease}
+@keyframes slideUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .top{background:#fff;border-bottom:1px solid #ddd;padding:12px 24px;display:flex;align-items:center;gap:24px}
 .top .logo{font-weight:700;color:#007acc;font-size:18px}
 .top .nav{display:flex;gap:16px;font-size:13px;color:#555}
@@ -53,8 +56,9 @@ body{font-family:'Segoe UI',sans-serif;background:#f5f5f5;color:#333}
 .tbar .num-group input{width:42px;text-align:center}
 .tbar .num-group .adj{width:18px;height:18px;padding:0;font-size:9px;line-height:18px;text-align:center;border:1px solid #ccc;border-radius:3px;background:#f5f5f5;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
 .tbar .num-group .adj:hover{background:#e0e0e0}
-.tbar .btn{padding:5px 14px;background:#f0f0f0;border:1px solid #ccc;border-radius:4px;cursor:pointer;font-size:12px;color:#333;transition:all 0.15s}
-.tbar .btn:hover{background:#e0e0e0;border-color:#aaa}
+.tbar .btn{padding:7px 18px;background:#f0f0f0;border:1px solid #ccc;border-radius:6px;cursor:pointer;font-size:13px;color:#333;transition:all 0.2s;font-weight:500}
+.tbar .btn:hover{background:#e0e0e0;border-color:#aaa;transform:translateY(-1px)}
+.tbar .btn:active{transform:scale(0.97)}
 .tbar .btn.pm{background:#007acc;color:#fff;border-color:#007acc}
 .tbar .btn.pm:hover{background:#0066aa}
 .tbar .btn.dg{color:#d32f2f}
@@ -79,9 +83,9 @@ body{font-family:'Segoe UI',sans-serif;background:#f5f5f5;color:#333}
 .ctrl-panel{background:#e8e8e8;border:1px solid #ccc;border-radius:6px;margin-top:6px;padding:8px 10px}
 .ctrl-row{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
 .ctrl-lbl{font-size:12px;color:#666;white-space:nowrap}
-.ctrl-btn{width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:1px solid #ccc;border-radius:4px;cursor:pointer;font-size:13px;font-weight:bold;color:#333;transition:all 0.15s}
-.ctrl-btn:hover{background:#e0e0e0;border-color:#999}
-.ctrl-btn:active{background:#ccc}
+.ctrl-btn{width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:1px solid #ccc;border-radius:6px;cursor:pointer;font-size:16px;font-weight:bold;color:#333;transition:all 0.15s}
+.ctrl-btn:hover{background:#e0e0e0;border-color:#999;transform:translateY(-1px)}
+.ctrl-btn:active{transform:scale(0.95)}
 .ctrl-btn.dg{color:#d32f2f}
 .ctrl-draw{background:#333!important;color:#fff!important;border-color:#333!important}
 .ctrl-draw:hover{background:#555!important}
@@ -245,7 +249,7 @@ function bmpCopy(){navigator.clipboard.writeText(document.getElementById('bmpHex
 let pxD=[],pxS=[],pxM='draw',pxCX=0,pxCY=0,pxLog=[];
 function pxInit(){const w=+document.getElementById('pxW').value||24,h=+document.getElementById('pxH').value||16,z=+document.getElementById('pxZ').value||10;if(w<1||w>192||h<1||h>63)return;if(!pxD.length){pxD=new Uint8Array(h*Math.ceil(w/8));pxS=[new Uint8Array(pxD)]}pxCX=Math.min(pxCX,w-1);pxCY=Math.min(pxCY,h-1);const c=document.getElementById('pxCanvas');c.width=w*z;c.height=h*z;pxDraw(w,h,z);pxHex(w,h);document.getElementById('pxPos').textContent=pxCX+','+pxCY;c.onmousedown=e=>{pxDn=true;pxPt(e,w,h,z)};c.onmousemove=e=>{if(pxDn)pxPt(e,w,h,z)};c.onmouseup=()=>{if(!pxDn)return;pxDn=false;pxS.push(new Uint8Array(pxD));if(pxS.length>50)pxS.shift();pxHex(w,h)};c.onmouseleave=()=>{if(pxDn){pxDn=false;pxS.push(new Uint8Array(pxD));if(pxS.length>50)pxS.shift();pxHex(w,h)}}}
 let pxDn=false;
-function pxPt(e,w,h,z){const r=e.target.getBoundingClientRect(),x=Math.floor((e.clientX-r.left)/z),y=Math.floor((e.clientY-r.top)/z);if(x<0||x>=w||y<0||y>=h)return;const bw=Math.ceil(w/8),bi=y*bw+(x>>3),bt=7-(x&7);if(pxM==='draw')pxD[bi]|=1<<bt;else pxD[bi]&=~(1<<bt);const ctx=e.target.getContext('2d');ctx.fillStyle=(pxD[bi]>>bt)&1?'#000':'#fff';ctx.fillRect(x*z,y*z,z,z)}
+function pxPt(e,w,h,z){const r=e.target.getBoundingClientRect(),x=Math.floor((e.clientX-r.left)/z),y=Math.floor((e.clientY-r.top)/z);if(x<0||x>=w||y<0||y>=h)return;const bw=Math.ceil(w/8),bi=y*bw+(x>>3),bt=7-(x&7);if(pxM==='draw'){pxD[bi]|=1<<bt;if(x!==pxCX||y!==pxCY){pxLog.push('→');pxCX=x;pxCY=y}pxLog.push('1')}else{pxD[bi]&=~(1<<bt);if(x!==pxCX||y!==pxCY){const dir=x>pxCX?'→':x<pxCX?'←':y>pxCY?'↓':'↑';pxLog.push(dir);pxCX=x;pxCY=y}pxLog.push('1')}const ctx=e.target.getContext('2d');ctx.fillStyle=(pxD[bi]>>bt)&1?'#000':'#fff';ctx.fillRect(x*z,y*z,z,z);pxUpdateLog();document.getElementById('pxPos').textContent=pxCX+','+pxCY}
 function pxDraw(w,h,z){const ctx=document.getElementById('pxCanvas').getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,w*z,h*z);const bw=Math.ceil(w/8);for(let y=0;y<h;y++)for(let x=0;x<w;x++){if((pxD[y*bw+(x>>3)]>>(7-(x&7)))&1){ctx.fillStyle='#000';ctx.fillRect(x*z,y*z,z,z)}}ctx.strokeStyle='#ddd';ctx.lineWidth=0.5;for(let x=0;x<=w;x++){ctx.beginPath();ctx.moveTo(x*z,0);ctx.lineTo(x*z,h*z);ctx.stroke()}for(let y=0;y<=h;y++){ctx.beginPath();ctx.moveTo(0,y*z);ctx.lineTo(w*z,y*z);ctx.stroke()}}
 function pxToggle(){pxM=pxM==='draw'?'erase':'draw';document.getElementById('pxModeBtn').textContent=pxM==='draw'?'Vẽ':'Tẩy';document.getElementById('pxModeBtn').className='btn'+(pxM==='draw'?' pm':'')}
 function pxClear(){const w=+document.getElementById('pxW').value||24,h=+document.getElementById('pxH').value||16;pxD=new Uint8Array(h*Math.ceil(w/8));pxS=[new Uint8Array(pxD)];pxCX=0;pxCY=0;pxLog=[];pxUpdateLog();pxInit()}
