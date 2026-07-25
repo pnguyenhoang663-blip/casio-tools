@@ -179,7 +179,7 @@ const H='0123456789abcdef';
 function hx(b){return b.map(x=>H[(x>>4)&15]+H[x&15]).join(' ')}
 function d2(n){return H[(n>>4)&15]+H[n&15]}
 function zl(s,d){document.getElementById(d).textContent=document.getElementById(s).value}
-function showTab(t){document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));document.querySelectorAll('.tabs .tab').forEach(c=>c.classList.remove('active'));document.getElementById('tab-'+t).classList.add('active');event.target.classList.add('active')}
+function showTab(t){document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));document.querySelectorAll('.tabs .tab').forEach(c=>c.classList.remove('active'));document.getElementById('tab-'+t).classList.add('active');document.querySelector('.tabs .tab[onclick*="'+t+'"]').classList.add('active')}
 function showSub(s){document.getElementById('sbmp').classList.add('hide');document.getElementById('spx').classList.add('hide');document.getElementById('sln').classList.add('hide');document.querySelectorAll('.sub-tabs .st').forEach(c=>c.classList.remove('active'));if(s==='bmp'){document.getElementById('sbmp').classList.remove('hide');document.querySelector('.sub-tabs .st:nth-child(1)').classList.add('active');bInit()}else if(s==='px'){document.getElementById('spx').classList.remove('hide');document.querySelector('.sub-tabs .st:nth-child(2)').classList.add('active');pInit()}else{document.getElementById('sln').classList.remove('hide');document.querySelector('.sub-tabs .st:nth-child(3)').classList.add('active');lInit()}}
 
 // === DỊCH ẢNH ===
