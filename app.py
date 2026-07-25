@@ -48,13 +48,16 @@ class Handler(BaseHTTPRequestHandler):
                 self.send_error(400)
         elif path.startswith("/samples/"):
             model = path.split("/")[2].split("?")[0] if len(path.split("/")) > 2 else "580vnx"
-            samples_dir = os.path.join(BASE_DIR, "rsc_ropchain" if model == "580vnx" else "asm_ropchain")
-            files = []
-            if os.path.exists(samples_dir):
-                for f in os.listdir(samples_dir):
-                    if f.endswith(".asm") or f.endswith(".rsc"):
-                        with open(os.path.join(samples_dir, f), "r", encoding="utf-8") as fh:
-                            files.append({"name": f, "content": fh.read()})
+            if model == "880btg":
+                files = []
+            else:
+                samples_dir = os.path.join(BASE_DIR, "rsc_ropchain")
+                files = []
+                if os.path.exists(samples_dir):
+                    for f in os.listdir(samples_dir):
+                        if f.endswith(".asm") or f.endswith(".rsc"):
+                            with open(os.path.join(samples_dir, f), "r", encoding="utf-8") as fh:
+                                files.append({"name": f, "content": fh.read()})
             result = json.dumps(files)
             if callback:
                 result = callback + "(" + result + ");"
