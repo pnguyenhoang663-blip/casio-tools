@@ -16,9 +16,8 @@ h2{color:#007acc;margin-bottom:12px}
 .panel{display:none;animation:slide .25s ease}
 .panel.active{display:block}
 @keyframes slide{from{opacity:0;transform:translateX(10px)}to{opacity:1;transform:translateX(0)}}
-.sub-panel{display:none}
+.sub-panel{display:none;animation:slide .2s ease}
 .sub-panel.active{display:block}
-.sub-bar .st{padding:6px 14px;cursor:pointer;font-size:13px;color:#888;border-bottom:2px solid transparent}
 .sub-bar .st:hover{color:#333}
 .sub-bar .st.active{color:#007acc;border-bottom-color:#007acc}
 .sub-panel{display:none}
@@ -202,7 +201,7 @@ function lineDraw(x1,y1,x2,y2){const dx=Math.abs(x2-x1),dy=Math.abs(y2-y1),sx=x1
 function lRen(z){const c=lineCanvas.getContext('2d');c.fillStyle='#fff';c.fillRect(0,0,192*z,63*z);for(let y=0;y<63;y++)for(let x=0;x<192;x++)if(lP[y][x]){c.fillStyle='#000';c.fillRect(x*z,y*z,z,z)}c.strokeStyle='#ddd';c.lineWidth=.5;for(let x=0;x<=192;x++){c.beginPath();c.moveTo(x*z,0);c.lineTo(x*z,63*z);c.stroke()}for(let y=0;y<=63;y++){c.beginPath();c.moveTo(0,y*z);c.lineTo(192*z,y*z);c.stroke()}}
 function lineClear(){lP=Array.from({length:63},()=>Array(192).fill(0));lH=[];lineInit()}
 function lineUndo(){if(lH.length){lP=lH.pop().map(r=>[...r]);lineInit()}}
-function lineUpd(){const v=Array.from({length:63},()=>Array(192).fill(0));const segs=[];for(let y=0;y<63;y++)for(let x=0;x<192;x++){if(lP[y][x]&&!v[y][x]){let mx=x,Mx=x,my=y,My=y;const q=[[x,y]];v[y][x]=1;while(q.length){const[cx,cy]=q.shift();mx=Math.min(mx,cx);Mx=Math.max(Mx,cx);my=Math.min(my,cy);My=Math.max(My,cy);for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){if(!dx&&!dy)continue;const nx=cx+dx,ny=cy+dy;if(nx>=0&&nx<192&&ny>=0&&ny<63&&lP[ny][nx]&&!v[ny][nx]){v[ny][nx]=1;q.push([nx,ny])}}}segs.push({x1:mx,y1:my,x2:Mx,y2:My})}}if(!segs.length){document.getElementById('lineHex').textContent='Kéo để vẽ line';return}let r='';segs.forEach((s,i)=>{if(i)r+='\n';r+='xr0 = hex '+d2(s.x1)+' '+d2(s.y1)+' '+d2(s.x2)+' '+d2(s.y2)+'\nline_draw'});document.getElementById('lineHex').textContent=r}
+function lineUpd(){const v=Array.from({length:63},()=>Array(192).fill(0));const segs=[];for(let y=0;y<63;y++)for(let x=0;x<192;x++){if(!lP[y][x]||v[y][x])continue;let mx=x,Mx=x,my=y,My=y;const q=[[x,y]];v[y][x]=1;while(q.length){const[cx,cy]=q.shift();mx=Math.min(mx,cx);Mx=Math.max(Mx,cx);my=Math.min(my,cy);My=Math.max(My,cy);for(let d=0;d<4;d++){const nx=cx+(d===1?1:d===3?-1:0),ny=cy+(d===0?1:d===2?-1:0);if(nx>=0&&nx<192&&ny>=0&&ny<63&&lP[ny][nx]&&!v[ny][nx]){v[ny][nx]=1;q.push([nx,ny])}}}segs.push({x1:mx,y1:my,x2:Mx,y2:My})}if(!segs.length){document.getElementById('lineHex').textContent='Kéo để vẽ line';return}let r='';segs.forEach((s,i)=>{if(i)r+='\n';r+='xr0 = hex '+d2(s.x1)+' '+d2(s.y1)+' '+d2(s.x2)+' '+d2(s.y2)+'\nline_draw'});document.getElementById('lineHex').textContent=r}
 function copyLine(){const t=document.getElementById('lineHex').textContent;if(t&&!t.includes('Kéo'))navigator.clipboard.writeText(t).catch(()=>{})}
 
 document.addEventListener('DOMContentLoaded',()=>{bmpInit();pxInit();lineInit()});
