@@ -45,8 +45,13 @@ body{font-family:'Segoe UI',sans-serif;background:#f5f5f5;color:#333}
 /* Toolbar */
 .tbar{display:flex;align-items:center;gap:8px;padding:8px 0;flex-wrap:wrap;border-bottom:1px solid #eee}
 .tbar label{font-size:12px;color:#888}
-.tbar input{padding:4px 6px;border:1px solid #ccc;border-radius:4px;font-size:12px;width:50px;outline:none;font-family:monospace}
-.tbar input:focus{border-color:#007acc}
+.tbar input[type=number]{padding:4px 6px;border:1px solid #ccc;border-radius:4px;font-size:12px;width:50px;outline:none;font-family:monospace}
+.tbar input[type=number]:focus{border-color:#007acc}
+.tbar input[type=range]{width:80px;vertical-align:middle}
+.tbar .num-group{display:inline-flex;align-items:center;gap:2px}
+.tbar .num-group input{width:42px;text-align:center}
+.tbar .num-group .adj{width:18px;height:18px;padding:0;font-size:9px;line-height:18px;text-align:center;border:1px solid #ccc;border-radius:3px;background:#f5f5f5;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+.tbar .num-group .adj:hover{background:#e0e0e0}
 .tbar .btn{padding:5px 14px;background:#f0f0f0;border:1px solid #ccc;border-radius:4px;cursor:pointer;font-size:12px;color:#333;transition:all 0.15s}
 .tbar .btn:hover{background:#e0e0e0;border-color:#aaa}
 .tbar .btn.pm{background:#007acc;color:#fff;border-color:#007acc}
@@ -124,13 +129,13 @@ body{font-family:'Segoe UI',sans-serif;background:#f5f5f5;color:#333}
   <!-- BITMAP -->
   <div id="subBitmap">
     <div class="tbar">
-      <label>Rộng:</label><input id="bmpW" value="24">
-      <label>Cao:</label><input id="bmpH" value="16">
-      <label>Zoom:</label><input id="bmpZ" value="10" style="width:40px">
+      <label>Rộng:</label><span class="num-group"><span class="adj" onclick="adjVal('bmpW',-1)">−</span><input type="number" id="bmpW" value="24" min="1" max="192"><span class="adj" onclick="adjVal('bmpW',1)">+</span></span>
+      <label>Cao:</label><span class="num-group"><span class="adj" onclick="adjVal('bmpH',-1)">−</span><input type="number" id="bmpH" value="16" min="1" max="63"><span class="adj" onclick="adjVal('bmpH',1)">+</span></span>
+      <label>Zoom:</label><input type="range" id="bmpZ" min="4" max="40" value="10" oninput="document.getElementById('bmpZl').textContent=this.value;bmpInit()"><span id="bmpZl" style="font-size:11px;color:#888;min-width:24px">10</span>
       <span class="sep"></span>
-      <span class="btn" onclick="bmpInit()">Tạo</span>
-      <span class="btn dg" onclick="bmpClear()">Xoá</span>
-      <span class="btn pm" id="bmpModeBtn" onclick="bmpToggle()">Vẽ</span>
+      <span class="btn" onclick="bmpInit()"><i class="fas fa-plus"></i> Tạo</span>
+      <span class="btn dg" onclick="bmpClear()"><i class="fas fa-trash"></i> Xoá</span>
+      <span class="btn pm" id="bmpModeBtn" onclick="bmpToggle()"><i class="fas fa-pen"></i> Vẽ</span>
     </div>
     <div class="cv-wrap"><canvas id="bmpCanvas"></canvas></div>
     <div class="hex-bar" id="bmpHexBar">
@@ -144,15 +149,15 @@ body{font-family:'Segoe UI',sans-serif;background:#f5f5f5;color:#333}
   <!-- PIXEL -->
   <div id="subPixel" class="hide">
     <div class="tbar">
-      <label>RỘNG:</label><input id="pxW" value="24">
-      <label>CAO:</label><input id="pxH" value="16">
-      <label>ZOOM:</label><input id="pxZ" value="10" style="width:40px">
+      <label>RỘNG:</label><span class="num-group"><span class="adj" onclick="adjVal('pxW',-1)">−</span><input type="number" id="pxW" value="24" min="1" max="192"><span class="adj" onclick="adjVal('pxW',1)">+</span></span>
+      <label>CAO:</label><span class="num-group"><span class="adj" onclick="adjVal('pxH',-1)">−</span><input type="number" id="pxH" value="16" min="1" max="63"><span class="adj" onclick="adjVal('pxH',1)">+</span></span>
+      <label>ZOOM:</label><input type="range" id="pxZ" min="4" max="40" value="10" oninput="document.getElementById('pxZl').textContent=this.value;pxInit()"><span id="pxZl" style="font-size:11px;color:#888;min-width:24px">10</span>
       <span class="sep"></span>
-      <span class="btn" onclick="pxInit()">Tạo</span>
-      <span class="btn" onclick="document.getElementById('pxFile').click()">Tải ảnh</span>
+      <span class="btn" onclick="pxInit()"><i class="fas fa-plus"></i> Tạo</span>
+      <span class="btn" onclick="document.getElementById('pxFile').click()"><i class="fas fa-upload"></i> Tải ảnh</span>
       <input type="file" id="pxFile" accept="image/*" style="display:none" onchange="pxLoadFile(event)">
-      <span class="btn dg" onclick="pxClear()">Xoá</span>
-      <span class="btn pm" id="pxModeBtn" onclick="pxToggle()">Vẽ</span>
+      <span class="btn dg" onclick="pxClear()"><i class="fas fa-trash"></i> Xoá</span>
+      <span class="btn pm" id="pxModeBtn" onclick="pxToggle()"><i class="fas fa-pen"></i> Vẽ</span>
     </div>
     <div class="cv-wrap"><canvas id="pxCanvas"></canvas></div>
     <div class="info-bar" id="pxInfo">KÍCH THƯỚC: 0×0 | PIXELS: 0</div>
@@ -168,9 +173,9 @@ body{font-family:'Segoe UI',sans-serif;background:#f5f5f5;color:#333}
   <div id="subLine" class="hide">
     <div style="color:#888;font-size:13px;padding:8px 0 4px;text-align:center">Kéo để vẽ line</div>
     <div class="tbar" style="justify-content:center">
-      <label>Zoom:</label><input id="lineZ" value="6" style="width:40px">
-      <span class="btn dg" onclick="lineClear()">Xoá</span>
-      <span class="btn" onclick="lineUndo()">↩️</span>
+      <label>Zoom:</label><input type="range" id="lineZ" min="2" max="20" value="6" oninput="document.getElementById('lineZl').textContent=this.value;lineInit()"><span id="lineZl" style="font-size:11px;color:#888;min-width:24px">6</span>
+      <span class="btn dg" onclick="lineClear()"><i class="fas fa-trash"></i> Xoá</span>
+      <span class="btn" onclick="lineUndo()"><i class="fas fa-undo"></i> ↩️</span>
     </div>
     <div class="cv-wrap"><canvas id="lineCanvas"></canvas></div>
     <div class="hex-bar" id="lineHexBar">
@@ -187,6 +192,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f5f5f5;color:#333}
 const hex='0123456789abcdef';
 function toHex(b){return b.map(x=>hex[(x>>4)&15]+hex[x&15]).join(' ')}
 function d2h(n){return hex[(n>>4)&15]+hex[n&15]}
+function adjVal(id,delta){const el=document.getElementById(id);let v=parseInt(el.value)+delta;const min=parseInt(el.min)||1,max=parseInt(el.max)||999;if(v<min)v=min;if(v>max)v=max;el.value=v;if(id.startsWith('bmp'))bmpInit();else if(id.startsWith('px'))pxInit()}
 
 // TABS
 function showTab(n){document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));document.querySelectorAll('.tabs .tab').forEach(t=>t.classList.remove('active'));document.getElementById('tab'+n.charAt(0).toUpperCase()+n.slice(1)).classList.add('active');document.querySelector('.tabs .tab[onclick*="'+n+'"]').classList.add('active')}
