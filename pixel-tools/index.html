@@ -34,7 +34,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f5f5f5;color:#333}
 .img-info .hdr{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#e8e8e8;border:1px solid #ccc;border-radius:6px 6px 0 0;font-size:13px}
 .img-info .hdr .cp{cursor:pointer;color:#007acc;font-weight:600}
 .img-info .hdr .cp:hover{text-decoration:underline}
-.img-info .hex{background:#fff;border:1px solid #ccc;border-top:0;padding:10px 12px;font-family:monospace;font-size:12px;color:#888;max-height:120px;overflow:auto;border-radius:0 0 6px 6px;word-break:break-all}
+.img-info .hex{background:#fff;border:1px solid #ccc;border-top:0;padding:10px 12px;font-family:monospace;font-size:12px;color:#c60;max-height:200px;overflow:auto;border-radius:0 0 6px 6px;word-break:break-all;user-select:text;line-height:1.6}
 
 /* Sub tabs */
 .sub-tabs{display:flex;gap:0;margin-bottom:0;background:#fff;border-bottom:1px solid #e0e0e0}
@@ -59,10 +59,10 @@ body{font-family:'Segoe UI',sans-serif;background:#f5f5f5;color:#333}
 .cv-wrap canvas{image-rendering:pixelated;border:1px solid #ccc;cursor:crosshair}
 
 /* Hex bar */
-.hex-bar{display:flex;align-items:center;padding:6px 10px;background:#e8e8e8;border:1px solid #ccc;border-radius:6px;margin-top:6px;gap:8px}
-.hex-bar .lbl{font-size:11px;color:#888;white-space:nowrap}
-.hex-bar .txt{flex:1;font-family:monospace;font-size:11px;color:#c60;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.hex-bar .cpy{cursor:pointer;color:#007acc;font-size:12px;font-weight:600;white-space:nowrap}
+.hex-bar{display:flex;align-items:flex-start;padding:8px 10px;background:#e8e8e8;border:1px solid #ccc;border-radius:6px;margin-top:6px;gap:8px;min-height:36px}
+.hex-bar .lbl{font-size:11px;color:#888;white-space:nowrap;padding-top:2px}
+.hex-bar .txt{flex:1;font-family:monospace;font-size:11px;color:#c60;max-height:120px;overflow:auto;white-space:pre-wrap;word-break:break-all;user-select:text;line-height:1.5}
+.hex-bar .cpy{cursor:pointer;color:#007acc;font-size:12px;font-weight:600;white-space:nowrap;flex-shrink:0}
 .hex-bar .cpy:hover{text-decoration:underline}
 
 /* Info */
