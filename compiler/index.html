@@ -210,10 +210,7 @@
         let tabCounter = 1;
 
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('localStorage comp_theme:', localStorage.getItem('comp_theme'));
-            console.log('localStorage comp_fontSize:', localStorage.getItem('comp_fontSize'));
             loadState();
-            console.log('After loadState - currentTheme:', currentTheme, 'fontSize:', fontSize);
             renderTabs();
             switchTab('script.rsc');
             updateLineNums();
@@ -363,7 +360,7 @@
         function showSettings() { document.getElementById('settingsPopup').classList.add('show'); }
         function adjFontSize(delta) { setFontSize(Math.min(40, Math.max(8, fontSize + delta))); }
         function setFontSize(v) { const val = parseInt(v); if (isNaN(val) || val < 8 || val > 40) return; fontSize = val; document.getElementById('editor').style.fontSize = val + 'px'; document.getElementById('highlightArea').style.fontSize = val + 'px'; document.getElementById('lineNums').style.fontSize = val + 'px'; document.getElementById('fontSizeVal').textContent = val; saveState(); }
-        function setTheme(val) { currentTheme = val; document.body.className = val === 'dark' ? '' : val; document.getElementById('themeSelect').value = val; saveState(); console.log('Theme set to:', val, 'saved:', localStorage.getItem('comp_theme')); }
+        function setTheme(val) { currentTheme = val; document.body.className = val === 'dark' ? '' : val; document.getElementById('themeSelect').value = val; saveState(); }
         function setTabSize(val) { tabSize = val; document.getElementById('editor').style.tabSize = val; document.getElementById('highlightArea').style.tabSize = val; saveState(); }
         function toggleWordWrap() { wordWrap = !wordWrap; document.getElementById('wrapToggle').classList.toggle('on', wordWrap); document.getElementById('editor').classList.toggle('wrap', wordWrap); document.getElementById('highlightArea').classList.toggle('wrap', wordWrap); saveState(); }
         function toggleLineNumbers() { lineNums = !lineNums; document.getElementById('lineToggle').classList.toggle('on', lineNums); document.getElementById('editorWrap').classList.toggle('line-numbers', lineNums); if (lineNums) updateLineNums(); else document.getElementById('lineNums').textContent = ''; saveState(); }
@@ -492,9 +489,7 @@
 
         function saveState() { try { localStorage.setItem('comp_fontSize', fontSize); localStorage.setItem('comp_theme', currentTheme); localStorage.setItem('comp_tabSize', tabSize); localStorage.setItem('comp_wrap', wordWrap); localStorage.setItem('comp_lineNums', lineNums); localStorage.setItem('comp_model', currentModel); } catch(e) {} }
         function loadState() {
-            const th = localStorage.getItem('comp_theme'); 
-            console.log('loadState - read comp_theme:', th);
-            if (th) { console.log('loadState - about to call setTheme with:', th); setTheme(th); console.log('loadState - after setTheme, currentTheme:', currentTheme); }
+            const th = localStorage.getItem('comp_theme'); if (th) setTheme(th);
             const fs = localStorage.getItem('comp_fontSize'); if (fs) setFontSize(parseInt(fs));
             const ts = localStorage.getItem('comp_tabSize'); if (ts) { tabSize = parseInt(ts); document.getElementById('tabSizeSelect').value = ts; document.getElementById('editor').style.tabSize = ts; document.getElementById('highlightArea').style.tabSize = ts; }
             const wr = localStorage.getItem('comp_wrap'); if (wr !== null) { wordWrap = wr === 'true'; document.getElementById('wrapToggle').classList.toggle('on', wordWrap); document.getElementById('editor').classList.toggle('wrap', wordWrap); document.getElementById('highlightArea').classList.toggle('wrap', wordWrap); }
