@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spell Tools - Casio</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',sans-serif;background:#0a0a0f;color:#e0e0e0;min-height:100vh;display:flex;flex-direction:column;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.nav{display:flex;align-items:center;padding:12px 24px;border-bottom:1px solid #1a1a2e;gap:12px}
+.nav .brand{font-size:18px;font-weight:700;color:#e0e0e0}
+.nav .spacer{flex:1}
+.nav .exit{cursor:pointer;color:#f44;font-size:14px;padding:6px 12px;border-radius:6px}
+.nav .exit:hover{background:rgba(255,255,255,0.05)}
+.main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;gap:24px;max-width:600px;margin:auto;width:100%}
+.title{font-size:42px;font-weight:800;color:#e0e0e0;text-align:center}
+.sub{font-size:16px;color:#888;text-align:center;margin-top:-12px}
+.box{background:#111830;border:1px solid #1a2040;border-radius:12px;padding:24px;width:100%}
+.box .lbl{font-size:13px;color:#8890a0;margin-bottom:8px}
+.inp-group{display:flex;gap:8px}
+.inp-group input{flex:1;padding:12px 16px;background:#0a0e1a;border:1px solid #1a2040;border-radius:8px;color:#e0e0e0;font-size:15px;outline:none;font-family:'Segoe UI',sans-serif}
+.inp-group input:focus{border-color:#007acc}
+.inp-group input::placeholder{color:#555}
+.inp-group button{padding:12px 24px;background:#007acc;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:15px;font-weight:600;transition:all .2s}
+.inp-group button:hover{background:#0098ff}
+.result{background:#0a0e1a;border:1px solid #1a2040;border-radius:8px;padding:16px;min-height:60px;font-family:'Consolas',monospace;font-size:13px;color:#ce9178;word-break:break-all;user-select:text;line-height:1.6;margin-top:8px}
+.count{font-size:12px;color:#555;margin-top:6px;text-align:right}
+.bar{margin-top:auto;display:flex;align-items:center;justify-content:space-between;padding:8px 24px;background:#111830;border-top:1px solid #1a2040;font-size:12px;color:#666}
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <span class="brand"><i class="fas fa-magic"></i> Tools spell</span>
+  <span class="spacer"></span>
+  <span class="exit" onclick="window.location.href='../index.html'"><i class="fas fa-times"></i> Thoát</span>
+</div>
+
+<div class="main">
+  <div class="title">Tools spell</div>
+  <div class="sub">Dành cho casio 580VNX</div>
+
+  <div class="box">
+    <div class="lbl">Nhập chữ để spell (Tối đa 17 chữ):</div>
+    <div class="inp-group">
+      <input type="text" id="inputText" maxlength="17" placeholder="Nhập chữ..." onkeydown="if(event.key==='Enter')spell()">
+      <button onclick="spell()"><i class="fas fa-wand-magic-sparkles"></i> Spell</button>
+    </div>
+    <div class="count" id="charCount">0 / 17</div>
+    <div class="lbl" style="margin-top:12px">Kết quả:</div>
+    <div class="result" id="result">Hex sẽ hiện ở đây</div>
+  </div>
+</div>
+
+<div class="bar">
+  <span>Tools spell</span>
+  <span>Bởi server Hack casio</span>
+</div>
+
+<script>
+const charsHex = {"/":"2F","L":"4C","M":"4D","N":"4E","O":"4F","T":"54","U":"55","V":"56","W":"57","X":"58","Y":"59","Z":"5A","a":"61","b":"62","c":"63","d":"64","e":"65","f":"66","g":"67","j":"6A","k":"6B","l":"6C","m":"6D","n":"6E","o":"6F","p":"70","q":"71","r":"72","s":"73","t":"74","u":"75","v":"76","w":"77","x":"78","y":"79","z":"7A","Á":"F451","á":"F471","À":"F450","à":"F470","Ả":"F454","ả":"F474","Ã":"F453","ã":"F473","Ạ":"F410","ạ":"F465","Ă":"F455","ă":"F475","Ắ":"F411","ắ":"F431","Ằ":"F412","ằ":"F432","Ẳ":"F490","ẳ":"F456","Ẵ":"F491","ẵ":"F457","Ặ":"F413","ặ":"F433","Â":"F452","â":"F472","Ấ":"F414","ấ":"F434","Ầ":"F415","ầ":"F435","Ẩ":"F416","ẩ":"F436","Ẫ":"F492","ẫ":"F477","Ậ":"F417","ậ":"F437","É":"F459","é":"F479","È":"F458","è":"F478","Ẻ":"F45B","ẻ":"F47B","Ẽ":"F418","ẽ":"F438","Ẹ":"F419","ẹ":"F439","Ê":"F45A","ê":"F47A","Ế":"F41A","ế":"F43A","Ề":"F41B","ề":"F43B","Ể":"F41C","ể":"F43C","Ễ":"F41D","ễ":"F43D","Ệ":"F41E","ệ":"F43E","Í":"F45D","í":"F47D","Ì":"F45C","ì":"F47C","Ỉ":"F42B","ỉ":"F47F","Ĩ":"F45E","ĩ":"F47E","Ị":"F428","ị":"F448","Ó":"F463","ó":"F483","Ò":"F462","ò":"F482","Ỏ":"F429","ỏ":"F486","Õ":"F430","õ":"F485","Ọ":"F42A","ọ":"F487","Ô":"F464","ô":"F484","Ố":"F41F","ố":"F43F","Ồ":"F420","ồ":"F440","Ổ":"F421","ổ":"F441","Ỗ":"F422","ỗ":"F442","Ộ":"F423","ộ":"F445","Ơ":"F444","ơ":"F44D","Ớ":"F425","ớ":"F44E","Ờ":"F426","ờ":"F446","Ở":"F427","ở":"F447","Ỡ":"F443","ỡ":"F46E","Ợ":"F424","ợ":"F48E","Ú":"F46A","ú":"F48A","Ù":"F469","ù":"F489","Ủ":"F42C","ủ":"F48C","Ũ":"F42D","ũ":"F48B","Ụ":"F42E","ụ":"F488","Ư":"F44F","ư":"F46F","Ứ":"F44A","ứ":"F461","Ừ":"F44B","ừ":"F467","Ử":"F44C","ử":"F468","Ữ":"F48F","ữ":"F476","Ự":"F449","ự":"F481","Ý":"F46D","ý":"F48D","Ỳ":"F42F","ỳ":"F45F","Ỷ":"F493","ỷ":"F466","Ỹ":"F494","ỹ":"F46B","Ỵ":"F495","ỵ":"F46C","Đ":"F460","đ":"F480"," ":"20","!":"21","?":"3F",".":"2E",",":"2C","-":"2D","+":"2B","*":"2A","/":"2F",":":"3A","@":"40","_":"5F","#":"23","$":"24","%":"25","&":"26","(":"28",")":"29","[":"5B","]":"5D","{":"7B","}":"7D","'":"27","\"":"22","~":"7E","`":"60","^":"5E","|":"7C","<":"3C",">":"3E","=":"3D","0":"30","1":"31","2":"32","3":"33","4":"34","5":"35","6":"36","7":"37","8":"38","9":"39"};
+
+document.getElementById('inputText').addEventListener('input', function() {
+    const len = this.value.length;
+    document.getElementById('charCount').textContent = len + ' / 17';
+});
+
+function spell() {
+    const input = document.getElementById('inputText');
+    const text = input.value.trim();
+    if (!text) return;
+    
+    // Limit to 17 chars and pad to center
+    let chars = text.split('').slice(0, 17);
+    const spaces = 17 - chars.length;
+    const left = Math.floor(spaces / 2);
+    const right = spaces - left;
+    for (let i = 0; i < left; i++) chars.unshift(' ');
+    for (let i = 0; i < right; i++) chars.push(' ');
+    
+    // Convert to hex
+    const hexList = [];
+    for (const ch of chars) {
+        if (charsHex[ch]) {
+            hexList.push(charsHex[ch]);
+        }
+    }
+    hexList.push('3C', '23');
+    
+    // Output
+    const hexStr = hexList.join(' ');
+    document.getElementById('result').textContent = hexStr;
+}
+</script>
+</body>
+</html>
