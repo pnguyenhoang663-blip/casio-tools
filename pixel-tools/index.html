@@ -75,6 +75,20 @@ body{font-family:'Segoe UI',sans-serif;background:#f5f5f5;color:#333}
 .info-bar{padding:6px 0;font-size:12px;color:#888;text-align:center}
 .credit{text-align:center;font-size:11px;color:#aaa;margin-top:12px;padding-top:8px;border-top:1px solid #eee}
 
+/* Control panel */
+.ctrl-panel{background:#e8e8e8;border:1px solid #ccc;border-radius:6px;margin-top:6px;padding:8px 10px}
+.ctrl-row{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.ctrl-lbl{font-size:12px;color:#666;white-space:nowrap}
+.ctrl-btn{width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:1px solid #ccc;border-radius:4px;cursor:pointer;font-size:13px;font-weight:bold;color:#333;transition:all 0.15s}
+.ctrl-btn:hover{background:#e0e0e0;border-color:#999}
+.ctrl-btn:active{background:#ccc}
+.ctrl-btn.dg{color:#d32f2f}
+.ctrl-draw{background:#333!important;color:#fff!important;border-color:#333!important}
+.ctrl-draw:hover{background:#555!important}
+.ctrl-log{font-family:monospace;font-size:11px;color:#c60;margin-top:6px;padding:6px 8px;background:#fff;border:1px solid #ddd;border-radius:4px;min-height:28px;max-height:120px;overflow:auto;word-break:break-all;user-select:text;line-height:1.6}
+.ctrl-copy{cursor:pointer;color:#007acc;font-size:12px;font-weight:600;margin-top:4px;text-align:right}
+.ctrl-copy:hover{text-decoration:underline}
+
 /* Hide */
 .hide{display:none}
 </style>
@@ -161,11 +175,22 @@ body{font-family:'Segoe UI',sans-serif;background:#f5f5f5;color:#333}
       <span class="btn pm" id="pxModeBtn" onclick="pxToggle()"><i class="fas fa-pen"></i> Vẽ</span>
     </div>
     <div class="cv-wrap"><canvas id="pxCanvas"></canvas></div>
-    <div class="info-bar" id="pxInfo">KÍCH THƯỚC: 0×0 | PIXELS: 0</div>
-    <div class="hex-bar" id="pxHexBar">
-      <span class="lbl">HEX:</span>
-      <span class="txt" id="pxHex"></span>
-      <span class="cpy" onclick="pxCopy()">📋 SAO CHÉP LỆNH</span>
+    <div class="ctrl-panel">
+      <div class="ctrl-row">
+        <span class="ctrl-lbl">Vị trí: <strong id="pxPos">0,0</strong></span>
+        <span class="sep"></span>
+        <span class="ctrl-btn" onclick="pxMove(0,-1)" title="Lên">↑</span>
+        <span class="ctrl-btn" onclick="pxMove(-1,0)" title="Trái">←</span>
+        <span class="ctrl-btn" onclick="pxMove(1,0)" title="Phải">→</span>
+        <span class="ctrl-btn" onclick="pxMove(0,1)" title="Xuống">↓</span>
+        <span class="sep"></span>
+        <span class="ctrl-btn ctrl-draw" onclick="pxDrawDot()" title="Vẽ đen">1</span>
+        <span class="sep"></span>
+        <span class="ctrl-btn" onclick="pxUndoMove()">↩</span>
+        <span class="ctrl-btn dg" onclick="pxClearLog()">Xoá</span>
+      </div>
+      <div class="ctrl-log" id="pxLog">Bảng phản hồi</div>
+      <div class="ctrl-copy" onclick="pxCopyLog()">📋 SAO CHÉP LỆNH</div>
     </div>
     <div class="credit">cre : Đinh Đức Trí</div>
   </div>
@@ -217,16 +242,23 @@ function bmpHex(w,h){document.getElementById('bmpHex').textContent=toHex(Array.f
 function bmpCopy(){navigator.clipboard.writeText(document.getElementById('bmpHex').textContent).catch(()=>{})}
 
 // ===== PIXEL =====
-let pxD=[],pxS=[],pxM='draw';
-function pxInit(){const w=+document.getElementById('pxW').value||24,h=+document.getElementById('pxH').value||16,z=+document.getElementById('pxZ').value||10;if(w<1||w>192||h<1||h>63)return;if(!pxD.length){pxD=new Uint8Array(h*Math.ceil(w/8));pxS=[new Uint8Array(pxD)]}const c=document.getElementById('pxCanvas');c.width=w*z;c.height=h*z;pxDraw(w,h,z);pxHex(w,h);document.getElementById('pxInfo').textContent='KÍCH THƯỚC: '+w+'×'+h+' | PIXELS: 0';c.onmousedown=e=>{pxDn=true;pxPt(e,w,h,z)};c.onmousemove=e=>{if(pxDn)pxPt(e,w,h,z)};c.onmouseup=()=>{if(!pxDn)return;pxDn=false;pxS.push(new Uint8Array(pxD));if(pxS.length>50)pxS.shift();pxHex(w,h)};c.onmouseleave=()=>{if(pxDn){pxDn=false;pxS.push(new Uint8Array(pxD));if(pxS.length>50)pxS.shift();pxHex(w,h)}}}
+let pxD=[],pxS=[],pxM='draw',pxCX=0,pxCY=0,pxLog=[];
+function pxInit(){const w=+document.getElementById('pxW').value||24,h=+document.getElementById('pxH').value||16,z=+document.getElementById('pxZ').value||10;if(w<1||w>192||h<1||h>63)return;if(!pxD.length){pxD=new Uint8Array(h*Math.ceil(w/8));pxS=[new Uint8Array(pxD)]}pxCX=Math.min(pxCX,w-1);pxCY=Math.min(pxCY,h-1);const c=document.getElementById('pxCanvas');c.width=w*z;c.height=h*z;pxDraw(w,h,z);pxHex(w,h);document.getElementById('pxPos').textContent=pxCX+','+pxCY;c.onmousedown=e=>{pxDn=true;pxPt(e,w,h,z)};c.onmousemove=e=>{if(pxDn)pxPt(e,w,h,z)};c.onmouseup=()=>{if(!pxDn)return;pxDn=false;pxS.push(new Uint8Array(pxD));if(pxS.length>50)pxS.shift();pxHex(w,h)};c.onmouseleave=()=>{if(pxDn){pxDn=false;pxS.push(new Uint8Array(pxD));if(pxS.length>50)pxS.shift();pxHex(w,h)}}}
 let pxDn=false;
 function pxPt(e,w,h,z){const r=e.target.getBoundingClientRect(),x=Math.floor((e.clientX-r.left)/z),y=Math.floor((e.clientY-r.top)/z);if(x<0||x>=w||y<0||y>=h)return;const bw=Math.ceil(w/8),bi=y*bw+(x>>3),bt=7-(x&7);if(pxM==='draw')pxD[bi]|=1<<bt;else pxD[bi]&=~(1<<bt);const ctx=e.target.getContext('2d');ctx.fillStyle=(pxD[bi]>>bt)&1?'#000':'#fff';ctx.fillRect(x*z,y*z,z,z)}
 function pxDraw(w,h,z){const ctx=document.getElementById('pxCanvas').getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,w*z,h*z);const bw=Math.ceil(w/8);for(let y=0;y<h;y++)for(let x=0;x<w;x++){if((pxD[y*bw+(x>>3)]>>(7-(x&7)))&1){ctx.fillStyle='#000';ctx.fillRect(x*z,y*z,z,z)}}ctx.strokeStyle='#ddd';ctx.lineWidth=0.5;for(let x=0;x<=w;x++){ctx.beginPath();ctx.moveTo(x*z,0);ctx.lineTo(x*z,h*z);ctx.stroke()}for(let y=0;y<=h;y++){ctx.beginPath();ctx.moveTo(0,y*z);ctx.lineTo(w*z,y*z);ctx.stroke()}}
 function pxToggle(){pxM=pxM==='draw'?'erase':'draw';document.getElementById('pxModeBtn').textContent=pxM==='draw'?'Vẽ':'Tẩy';document.getElementById('pxModeBtn').className='btn'+(pxM==='draw'?' pm':'')}
-function pxClear(){const w=+document.getElementById('pxW').value||24,h=+document.getElementById('pxH').value||16;pxD=new Uint8Array(h*Math.ceil(w/8));pxS=[new Uint8Array(pxD)];pxInit()}
-function pxHex(w,h){const c=Array.from(pxD).filter(b=>b!==0).length;document.getElementById('pxInfo').textContent='KÍCH THƯỚC: '+w+'×'+h+' | PIXELS: '+c;document.getElementById('pxHex').textContent=toHex(Array.from(pxD))}
+function pxClear(){const w=+document.getElementById('pxW').value||24,h=+document.getElementById('pxH').value||16;pxD=new Uint8Array(h*Math.ceil(w/8));pxS=[new Uint8Array(pxD)];pxCX=0;pxCY=0;pxLog=[];pxUpdateLog();pxInit()}
+function pxHex(w,h){document.getElementById('pxHex').textContent=toHex(Array.from(pxD))}
 function pxCopy(){navigator.clipboard.writeText(document.getElementById('pxHex').textContent).catch(()=>{})}
-function pxLoadFile(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=function(ev){const i=new Image();i.onload=function(){let w=i.width,h=i.height;const mw=192,mh=63;if(w>mw||h>mh){const r=Math.min(mw/w,mh/h);w=Math.floor(w*r);h=Math.floor(h*r)}document.getElementById('pxW').value=w;document.getElementById('pxH').value=h;const c=document.createElement('canvas');c.width=w;c.height=h;const ctx=c.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);ctx.drawImage(i,0,0,w,h);const d=ctx.getImageData(0,0,w,h).data;const bw=Math.ceil(w/8);pxD=new Uint8Array(h*bw);for(let y=0;y<h;y++)for(let x=0;x<w;x++){const idx=(y*w+x)*4,g=d[idx]*0.299+d[idx+1]*0.587+d[idx+2]*0.114;if(g<128)pxD[y*bw+(x>>3)]|=(1<<(7-(x&7)))}pxS=[new Uint8Array(pxD)];pxInit()};i.src=ev.target.result};r.readAsDataURL(f);e.target.value=''}
+function pxLoadFile(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=function(ev){const i=new Image();i.onload=function(){let w=i.width,h=i.height;const mw=192,mh=63;if(w>mw||h>mh){const r=Math.min(mw/w,mh/h);w=Math.floor(w*r);h=Math.floor(h*r)}document.getElementById('pxW').value=w;document.getElementById('pxH').value=h;const c=document.createElement('canvas');c.width=w;c.height=h;const ctx=c.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);ctx.drawImage(i,0,0,w,h);const d=ctx.getImageData(0,0,w,h).data;const bw=Math.ceil(w/8);pxD=new Uint8Array(h*bw);for(let y=0;y<h;y++)for(let x=0;x<w;x++){const idx=(y*w+x)*4,g=d[idx]*0.299+d[idx+1]*0.587+d[idx+2]*0.114;if(g<128)pxD[y*bw+(x>>3)]|=(1<<(7-(x&7)))}pxS=[new Uint8Array(pxD)];pxCX=0;pxCY=0;pxLog=[];pxUpdateLog();pxInit()};i.src=ev.target.result};r.readAsDataURL(f);e.target.value=''}
+// Cursor control
+function pxMove(dx,dy){const w=+document.getElementById('pxW').value||24,h=+document.getElementById('pxH').value||16;const nx=Math.max(0,Math.min(w-1,pxCX+dx)),ny=Math.max(0,Math.min(h-1,pxCY+dy));if(nx===pxCX&&ny===pxCY)return;const dir=nx>pxCX?'→':nx<pxCX?'←':ny>pxCY?'↓':'↑';pxLog.push(dir);pxCX=nx;pxCY=ny;pxUpdateLog();document.getElementById('pxPos').textContent=pxCX+','+pxCY}
+function pxDrawDot(){const w=+document.getElementById('pxW').value||24,h=+document.getElementById('pxH').value||16,z=+document.getElementById('pxZ').value||10;if(pxCX>=w||pxCY>=h)return;const bw=Math.ceil(w/8),bi=pxCY*bw+(pxCX>>3),bt=7-(pxCX&7);pxD[bi]|=1<<bt;pxLog.push('1');const c=document.getElementById('pxCanvas'),ctx=c.getContext('2d');ctx.fillStyle='#000';ctx.fillRect(pxCX*z,pxCY*z,z,z);pxS.push(new Uint8Array(pxD));if(pxS.length>50)pxS.shift();pxHex(w,h);pxUpdateLog()}
+function pxUndoMove(){if(pxLog.length){pxLog.pop();pxUpdateLog()}};
+function pxClearLog(){pxLog=[];pxUpdateLog()}
+function pxUpdateLog(){let r='',cnt=1;for(let i=0;i<pxLog.length;i++){if(i+1<pxLog.length&&pxLog[i]===pxLog[i+1]){cnt++;continue}if(cnt>1){r+='['+pxLog[i]+'] × '+cnt+' '}else{r+='['+pxLog[i]+'] '}cnt=1}document.getElementById('pxLog').textContent=r.trim()||'Bảng phản hồi'}
+function pxCopyLog(){const t=document.getElementById('pxLog').textContent;if(t&&t!=='Bảng phản hồi'){const lines=[];let line='',cnt=0;const parts=t.split(' ');for(let p of parts){if(!p)continue;if(line.length+p.length>80){lines.push(line);line=''}line+=p+' '}if(line)lines.push(line);navigator.clipboard.writeText(lines.join('\n')).catch(()=>{})}}
 
 // ===== LINE DRAW =====
 let lP=[],lH=[],lD=false,lS=null;
