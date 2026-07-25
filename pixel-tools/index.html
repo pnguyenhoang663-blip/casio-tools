@@ -13,9 +13,11 @@ h2{color:#007acc;margin-bottom:12px}
 .tab-bar .tab{padding:8px 20px;cursor:pointer;font-size:14px;color:#888;border-bottom:2px solid transparent}
 .tab-bar .tab:hover{color:#333}
 .tab-bar .tab.active{color:#007acc;border-bottom-color:#007acc;font-weight:600}
-.panel{display:none}
+.panel{display:none;animation:slide .25s ease}
 .panel.active{display:block}
-.sub-bar{display:flex;gap:0;border-bottom:1px solid #ddd;margin-bottom:8px}
+@keyframes slide{from{opacity:0;transform:translateX(10px)}to{opacity:1;transform:translateX(0)}}
+.sub-panel{display:none}
+.sub-panel.active{display:block}
 .sub-bar .st{padding:6px 14px;cursor:pointer;font-size:13px;color:#888;border-bottom:2px solid transparent}
 .sub-bar .st:hover{color:#333}
 .sub-bar .st.active{color:#007acc;border-bottom-color:#007acc}
@@ -61,7 +63,7 @@ h2{color:#007acc;margin-bottom:12px}
 </head>
 <body>
 
-<h2><i class="fas fa-paint-brush"></i> Pixel Tools</h2>
+<h2><i class="fas fa-paint-brush"></i> Pixel Tools <span style="font-size:12px;color:#888;cursor:pointer;float:right" onclick="window.location.href='../index.html'"><i class="fas fa-times"></i> Thoát</span></h2>
 
 <div class="tab-bar">
   <span class="tab active" onclick="showPanel('image')"><i class="fas fa-image"></i> Dịch Ảnh</span>
@@ -144,7 +146,7 @@ h2{color:#007acc;margin-bottom:12px}
   <!-- LINE -->
   <div class="sub-panel" id="sub-line">
     <div class="tbar">
-      <label>Zoom:</label><input type="range" id="lineZ" min="2" max="20" value="6" oninput="lineZl.textContent=this.value">
+      <label>Zoom:</label><input type="range" id="lineZ" min="2" max="20" value="6" oninput="lineZl.textContent=this.value;lineInit()">
       <span id="lineZl">6</span>
       <span class="btn dg" onclick="lineClear()"><i class="fas fa-trash"></i> Xoá</span>
       <span class="btn" onclick="lineUndo()"><i class="fas fa-undo"></i> ↩️</span>
@@ -195,13 +197,13 @@ function pUpdL(){let r='',n=1;for(let i=0;i<pL.length;i++){if(i+1<pL.length&&pL[
 
 // ===== LINE =====
 let lP=[],lH=[],lD=false,lS=null;
-function lineInit(){const z=+lineZ.value||6;const c=lineCanvas;c.width=192*z;c.height=63*z;if(!lP.length){lP=Array.from({length:63},()=>Array(192).fill(false));lH=[]}lRen(z);lUpd();c.onmousedown=e=>{lD=true;const r=c.getBoundingClientRect();lS={x:Math.max(0,Math.min(191,Math.floor((e.clientX-r.left)/z))),y:Math.max(0,Math.min(62,Math.floor((e.clientY-r.top)/z)))};lH.push(lP.map(r=>[...r]));if(lH.length>50)lH.shift()};c.onmousemove=e=>{if(!lD||!lS)return;const r=c.getBoundingClientRect(),x=Math.max(0,Math.min(191,Math.floor((e.clientX-r.left)/z))),y=Math.max(0,Math.min(62,Math.floor((e.clientY-r.top)/z)));lP=lH[lH.length-1].map(r=>[...r]);lDr(lS.x,lS.y,x,y);lRen(z)};c.onmouseup=()=>{if(!lD)return;lD=false;lS=null;lUpd()};c.onmouseleave=()=>{if(!lD)return;lD=false;lS=null;lUpd()}}
-function lDr(x1,y1,x2,y2){const dx=Math.abs(x2-x1),dy=Math.abs(y2-y1),sx=x1<x2?1:-1,sy=y1<y2?1:-1;let e=dx-dy;while(1){if(x1>=0&&x1<192&&y1>=0&&y1<63)lP[y1][x1]=1;if(x1===x2&&y1===y2)break;const e2=2*e;if(e2>-dy){e-=dy;x1+=sx}if(e2<dx){e+=dx;y1+=sy}}}
+function lineInit(){const z=+lineZ.value||6;const c=lineCanvas;c.width=192*z;c.height=63*z;if(!lP.length||lH.length===0){lP=Array.from({length:63},()=>Array(192).fill(0));lH=[]}lRen(z);lineUpd();c.onmousedown=e=>{lD=true;const r=c.getBoundingClientRect();lS={x:Math.max(0,Math.min(191,Math.floor((e.clientX-r.left)/z))),y:Math.max(0,Math.min(62,Math.floor((e.clientY-r.top)/z)))};lH.push(lP.map(r=>[...r]));if(lH.length>50)lH.shift()};c.onmousemove=e=>{if(!lD||!lS)return;const r=c.getBoundingClientRect(),x=Math.max(0,Math.min(191,Math.floor((e.clientX-r.left)/z))),y=Math.max(0,Math.min(62,Math.floor((e.clientY-r.top)/z)));lP=lH[lH.length-1].map(r=>[...r]);lineDraw(lS.x,lS.y,x,y);lRen(z)};c.onmouseup=()=>{if(!lD)return;lD=false;lS=null;lineUpd()};c.onmouseleave=()=>{if(!lD)return;lD=false;lS=null;lineUpd()}}
+function lineDraw(x1,y1,x2,y2){const dx=Math.abs(x2-x1),dy=Math.abs(y2-y1),sx=x1<x2?1:-1,sy=y1<y2?1:-1;let e=dx-dy;while(1){if(x1>=0&&x1<192&&y1>=0&&y1<63)lP[y1][x1]=1;if(x1===x2&&y1===y2)break;const e2=2*e;if(e2>-dy){e-=dy;x1+=sx}if(e2<dx){e+=dx;y1+=sy}}}
 function lRen(z){const c=lineCanvas.getContext('2d');c.fillStyle='#fff';c.fillRect(0,0,192*z,63*z);for(let y=0;y<63;y++)for(let x=0;x<192;x++)if(lP[y][x]){c.fillStyle='#000';c.fillRect(x*z,y*z,z,z)}c.strokeStyle='#ddd';c.lineWidth=.5;for(let x=0;x<=192;x++){c.beginPath();c.moveTo(x*z,0);c.lineTo(x*z,63*z);c.stroke()}for(let y=0;y<=63;y++){c.beginPath();c.moveTo(0,y*z);c.lineTo(192*z,y*z);c.stroke()}}
-function lClear(){lP=Array.from({length:63},()=>Array(192).fill(0));lH=[];lInit()}
-function lUndo(){if(lH.length){lP=lH.pop().map(r=>[...r]);lInit()}}
-function lUpd(){const v=Array.from({length:63},()=>Array(192).fill(0));const segs=[];for(let y=0;y<63;y++)for(let x=0;x<192;x++){if(lP[y][x]&&!v[y][x]){let mx=x,Mx=x,my=y,My=y;const q=[[x,y]];v[y][x]=1;while(q.length){const[cx,cy]=q.shift();mx=Math.min(mx,cx);Mx=Math.max(Mx,cx);my=Math.min(my,cy);My=Math.max(My,cy);for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){if(!dx&&!dy)continue;const nx=cx+dx,ny=cy+dy;if(nx>=0&&nx<192&&ny>=0&&ny<63&&lP[ny][nx]&&!v[ny][nx]){v[ny][nx]=1;q.push([nx,ny])}}}segs.push({x1:mx,y1:my,x2:Mx,y2:My})}}if(!segs.length){lineHex.textContent='Kéo để vẽ line';return}let r='';segs.forEach((s,i)=>{if(i)r+='\n';r+='xr0 = hex '+d2(s.x1)+' '+d2(s.y1)+' '+d2(s.x2)+' '+d2(s.y2)+'\nline_draw'});lineHex.textContent=r}
-function copyLine(){const t=lineHex.textContent;if(t&&!t.includes('Kéo'))navigator.clipboard.writeText(t).catch(()=>{})}
+function lineClear(){lP=Array.from({length:63},()=>Array(192).fill(0));lH=[];lineInit()}
+function lineUndo(){if(lH.length){lP=lH.pop().map(r=>[...r]);lineInit()}}
+function lineUpd(){const v=Array.from({length:63},()=>Array(192).fill(0));const segs=[];for(let y=0;y<63;y++)for(let x=0;x<192;x++){if(lP[y][x]&&!v[y][x]){let mx=x,Mx=x,my=y,My=y;const q=[[x,y]];v[y][x]=1;while(q.length){const[cx,cy]=q.shift();mx=Math.min(mx,cx);Mx=Math.max(Mx,cx);my=Math.min(my,cy);My=Math.max(My,cy);for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){if(!dx&&!dy)continue;const nx=cx+dx,ny=cy+dy;if(nx>=0&&nx<192&&ny>=0&&ny<63&&lP[ny][nx]&&!v[ny][nx]){v[ny][nx]=1;q.push([nx,ny])}}}segs.push({x1:mx,y1:my,x2:Mx,y2:My})}}if(!segs.length){document.getElementById('lineHex').textContent='Kéo để vẽ line';return}let r='';segs.forEach((s,i)=>{if(i)r+='\n';r+='xr0 = hex '+d2(s.x1)+' '+d2(s.y1)+' '+d2(s.x2)+' '+d2(s.y2)+'\nline_draw'});document.getElementById('lineHex').textContent=r}
+function copyLine(){const t=document.getElementById('lineHex').textContent;if(t&&!t.includes('Kéo'))navigator.clipboard.writeText(t).catch(()=>{})}
 
 document.addEventListener('DOMContentLoaded',()=>{bmpInit();pxInit();lineInit()});
 </script>
