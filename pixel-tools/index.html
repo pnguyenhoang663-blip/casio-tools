@@ -3,82 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pixel Tools - Casio</title>
+    <title>Pixel Tools</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root {
-            --bg: #1e1e1e; --bg2: #252526; --bg3: #2d2d2d; --bg4: #333;
-            --border: #3e3e42; --text: #ccc; --text2: #888; --accent: #007acc;
-            --font: 'Consolas', monospace; --font-ui: 'Segoe UI', system-ui, sans-serif;
-        }
-        body { font-family: var(--font-ui); background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; }
-        .topbar { display: flex; align-items: center; padding: 0 12px; height: 40px; background: var(--bg2); border-bottom: 1px solid var(--border); flex-shrink: 0; }
-        .topbar .tab { padding: 8px 16px; cursor: pointer; font-size: 13px; color: var(--text2); border-bottom: 2px solid transparent; transition: all 0.15s; }
-        .topbar .tab:hover { color: var(--text); background: var(--bg3); }
-        .topbar .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-        .topbar .spacer { flex: 1; }
-        .topbar .exit-btn { padding: 6px 12px; cursor: pointer; color: #f44747; font-size: 13px; border-radius: 4px; }
-        .topbar .exit-btn:hover { background: var(--bg3); }
-        .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-        .panel { display: none; flex: 1; flex-direction: column; overflow: hidden; }
-        .panel.active { display: flex; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        :root { --bg:#f0f0f0; --bg2:#e8e8e8; --bg3:#ddd; --bg4:#ccc; --border:#bbb; --text:#222; --text2:#666; --accent:#007acc; --font:'Consolas',monospace; --font-ui:'Segoe UI',system-ui,sans-serif; }
+        body { font-family:var(--font-ui); background:var(--bg); color:var(--text); height:100vh; display:flex; flex-direction:column; }
+        .topbar { display:flex; align-items:center; padding:0 12px; height:40px; background:var(--bg2); border-bottom:1px solid var(--border); flex-shrink:0; }
+        .topbar .tab { padding:8px 16px; cursor:pointer; font-size:13px; color:var(--text2); border-bottom:2px solid transparent; transition:all .15s; }
+        .topbar .tab:hover { color:var(--text); background:var(--bg3); }
+        .topbar .tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+        .topbar .spacer { flex:1; }
+        .topbar .exit-btn { padding:6px 12px; cursor:pointer; color:#d33; font-size:13px; border-radius:4px; }
+        .topbar .exit-btn:hover { background:var(--bg3); }
+        .main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+        .panel { display:none; flex:1; flex-direction:column; overflow:hidden; }
+        .panel.active { display:flex; }
 
-        /* Image Tab */
-        .image-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; gap: 16px; }
-        .upload-box { border: 2px dashed var(--border); border-radius: 12px; padding: 30px 40px; text-align: center; cursor: pointer; transition: all 0.2s; }
-        .upload-box:hover { border-color: var(--accent); background: var(--bg2); }
-        .upload-box i { font-size: 40px; color: var(--text2); margin-bottom: 10px; }
-        .upload-box p { font-size: 14px; color: var(--text2); }
-        .preview-section { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; justify-content: center; }
-        .preview-section canvas { image-rendering: pixelated; border: 1px solid var(--border); background: #111; }
-        .hex-result { max-width: 600px; width: 100%; }
-        .hex-result .hdr { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; background: var(--bg2); border: 1px solid var(--border); border-radius: 6px 6px 0 0; font-size: 12px; }
-        .hex-result .hdr span { color: var(--text2); }
-        .hex-result .hdr .cp { cursor: pointer; color: var(--accent); }
-        .hex-result .hdr .cp:hover { text-decoration: underline; }
-        .hex-result .body { padding: 10px; font-family: var(--font); font-size: 11px; color: #ce9178; background: var(--bg); border: 1px solid var(--border); border-top: none; border-radius: 0 0 6px 6px; max-height: 200px; overflow: auto; word-break: break-all; user-select: text; }
+        .sub-bar { display:flex; background:var(--bg2); border-bottom:1px solid var(--border); flex-shrink:0; padding-left:8px; }
+        .sub-bar .subtab { padding:6px 14px; cursor:pointer; font-size:12px; color:var(--text2); border-bottom:2px solid transparent; transition:all .15s; }
+        .sub-bar .subtab:hover { color:var(--text); }
+        .sub-bar .subtab.active { color:var(--accent); border-bottom-color:var(--accent); }
 
-        /* Sub tabs */
-        .sub-bar { display: flex; background: var(--bg2); border-bottom: 1px solid var(--border); flex-shrink: 0; padding-left: 8px; }
-        .sub-bar .subtab { padding: 6px 14px; cursor: pointer; font-size: 12px; color: var(--text2); border-bottom: 2px solid transparent; transition: all 0.15s; }
-        .sub-bar .subtab:hover { color: var(--text); }
-        .sub-bar .subtab.active { color: var(--accent); border-bottom-color: var(--accent); }
+        .tool-row { display:flex; align-items:center; gap:6px; padding:6px 12px; background:var(--bg2); border-bottom:1px solid var(--border); flex-shrink:0; flex-wrap:wrap; }
+        .tool-row label { font-size:12px; color:var(--text2); }
+        .tool-btn { padding:5px 12px; background:var(--bg3); border:1px solid var(--border); border-radius:4px; color:var(--text); cursor:pointer; font-size:12px; font-family:var(--font-ui); transition:all .15s; }
+        .tool-btn:hover { background:var(--bg4); border-color:var(--accent); }
+        .tool-btn.primary { background:var(--accent); color:#fff; border-color:var(--accent); }
+        .tool-btn.danger { color:#d33; }
+        .tool-btn.active { background:var(--accent); color:#fff; }
+        .tool-input { padding:3px 6px; background:var(--bg3); color:var(--text); border:1px solid var(--border); border-radius:3px; font-size:12px; outline:none; font-family:var(--font); width:50px; }
+        .tool-input:focus { border-color:var(--accent); }
+        .sep { width:1px; height:20px; background:var(--border); margin:0 4px; }
 
-        /* Toolbar */
-        .tool-row { display: flex; align-items: center; gap: 6px; padding: 6px 12px; background: var(--bg2); border-bottom: 1px solid var(--border); flex-shrink: 0; flex-wrap: wrap; }
-        .tool-row label { font-size: 12px; color: var(--text2); }
-        .tool-btn { padding: 5px 12px; background: var(--bg3); border: 1px solid var(--border); border-radius: 4px; color: var(--text); cursor: pointer; font-size: 12px; font-family: var(--font-ui); transition: all 0.15s; }
-        .tool-btn:hover { background: var(--bg4); border-color: var(--accent); }
-        .tool-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
-        .tool-btn.danger { color: #f44747; }
-        .tool-btn.active { background: var(--accent); color: #fff; }
-        .tool-input { padding: 3px 6px; background: var(--bg3); color: var(--text); border: 1px solid var(--border); border-radius: 3px; font-size: 12px; outline: none; font-family: var(--font); width: 50px; }
-        .tool-input:focus { border-color: var(--accent); }
-        .sep { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
+        /* Layout: canvas top, hex bottom */
+        .edit-body { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+        .canvas-wrap { flex:1; display:flex; align-items:center; justify-content:center; overflow:auto; padding:12px; background:var(--bg); }
+        .canvas-wrap canvas { image-rendering:pixelated; border:1px solid var(--border); cursor:crosshair; }
 
-        /* Editor */
-        .edit-body { flex: 1; display: flex; overflow: hidden; }
-        .canvas-wrap { flex: 1; display: flex; align-items: center; justify-content: center; overflow: auto; padding: 12px; background: var(--bg); }
-        .canvas-wrap canvas { image-rendering: pixelated; border: 1px solid var(--border); cursor: crosshair; }
-        .side-panel { width: 280px; display: flex; flex-direction: column; border-left: 1px solid var(--border); background: var(--bg2); flex-shrink: 0; }
-        .side-panel .hdr { padding: 6px 10px; font-size: 11px; color: var(--text2); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
-        .side-panel .hdr .cp { cursor: pointer; color: var(--accent); }
-        .side-panel .hdr .cp:hover { text-decoration: underline; }
-        .side-panel .body { flex: 1; padding: 8px 10px; font-family: var(--font); font-size: 11px; overflow: auto; white-space: pre; color: #ce9178; user-select: text; }
+        .hex-bar { display:flex; align-items:center; padding:4px 10px; background:var(--bg2); border-top:1px solid var(--border); flex-shrink:0; gap:8px; }
+        .hex-bar .hb-label { font-size:11px; color:var(--text2); white-space:nowrap; }
+        .hex-bar .hb-text { flex:1; font-family:var(--font); font-size:11px; color:#c60; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; user-select:text; }
+        .hex-bar .hb-copy { cursor:pointer; color:var(--accent); font-size:12px; white-space:nowrap; }
+        .hex-bar .hb-copy:hover { text-decoration:underline; }
 
-        /* Line draw */
-        .line-info { padding: 4px 12px; font-size: 12px; color: var(--text2); text-align: center; background: var(--bg2); border-top: 1px solid var(--border); }
+        /* Image tab */
+        .image-body { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; gap:16px; }
+        .upload-box { border:2px dashed var(--border); border-radius:12px; padding:30px 40px; text-align:center; cursor:pointer; transition:all .2s; }
+        .upload-box:hover { border-color:var(--accent); background:var(--bg2); }
+        .upload-box i { font-size:40px; color:var(--text2); margin-bottom:10px; }
+        .upload-box p { font-size:14px; color:var(--text2); }
+        .preview-section { display:flex; flex-direction:column; align-items:center; gap:12px; width:100%; max-width:600px; }
+        .preview-section canvas { image-rendering:pixelated; border:1px solid var(--border); background:#fff; }
 
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: var(--bg2); }
-        ::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 3px; }
-
-        @media (max-width: 768px) {
-            .side-panel { width: 180px; }
-            .edit-body { flex-direction: column; }
-            .side-panel { width: 100%; border-left: none; border-top: 1px solid var(--border); }
-        }
+        .line-info { padding:4px 12px; font-size:12px; color:var(--text2); text-align:center; background:var(--bg2); border-top:1px solid var(--border); }
+        ::-webkit-scrollbar { width:6px; height:6px; }
+        ::-webkit-scrollbar-track { background:var(--bg2); }
+        ::-webkit-scrollbar-thumb { background:var(--bg4); border-radius:3px; }
     </style>
 </head>
 <body>
@@ -90,26 +71,33 @@
     </div>
 
     <div class="main">
-        <!-- === DỊCH ẢNH === -->
+        <!-- DỊCH ẢNH -->
         <div class="panel" id="panel-image">
             <div class="image-body">
                 <div class="upload-box" onclick="document.getElementById('imgInput').click()">
                     <i class="fas fa-cloud-upload-alt"></i>
                     <p><strong>Tải ảnh lên</strong></p>
-                    <p style="font-size:11px">Hỗ trợ: PNG, JPG, BMP (sẽ resize về 192×63)</p>
+                    <p style="font-size:11px">PNG, JPG, BMP → 192×63</p>
                     <input type="file" id="imgInput" accept="image/*" style="display:none" onchange="loadImage(event)">
                 </div>
                 <div class="preview-section">
-                    <canvas id="previewCanvas" width="192" height="63"></canvas>
-                    <div class="hex-result">
-                        <div class="hdr"><span>Output: 192 × 63 pixels</span><span class="cp" onclick="copyImageHex()"><i class="fas fa-copy"></i> SAO CHÉP MÃ HEX</span></div>
-                        <div class="body" id="imageHex">Chưa có ảnh</div>
+                    <canvas id="previewCanvas" width="384" height="126"></canvas>
+                    <div style="display:flex;width:100%;gap:12px;align-items:center">
+                        <label style="font-size:12px;color:var(--text2)">Output: 192 × 63 pixels</label>
+                        <span class="sep"></span>
+                        <input class="tool-input" id="imgThreshold" value="128" style="width:50px">
+                        <label style="font-size:12px">Threshold</label>
+                        <span class="sep"></span>
+                        <button class="tool-btn primary" onclick="copyImageHex()"><i class="fas fa-copy"></i> SAO CHÉP MÃ HEX</button>
+                    </div>
+                    <div class="hex-bar" style="width:100%;border-top:none;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:8px 12px">
+                        <div class="hb-text" id="imageHex" style="white-space:normal;max-height:120px;overflow:auto">Chưa có ảnh</div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- === VẼ PIXEL === -->
+        <!-- VẼ PIXEL -->
         <div class="panel active" id="panel-draw">
             <div class="sub-bar">
                 <div class="subtab active" data-sub="bitmap" onclick="switchSub('bitmap')">🗺️ Bitmap</div>
@@ -126,14 +114,15 @@
                     <span class="sep"></span>
                     <button class="tool-btn" onclick="bmpInit()"><i class="fas fa-plus"></i> Tạo</button>
                     <button class="tool-btn danger" onclick="bmpClear()"><i class="fas fa-trash"></i> Xoá</button>
-                    <button class="tool-btn primary active" id="bmpModeBtn" onclick="bmpToggleMode()"><i class="fas fa-pen"></i> Vẽ</button>
                     <button class="tool-btn" onclick="bmpUndo()"><i class="fas fa-undo"></i> ↩️</button>
+                    <button class="tool-btn primary active" id="bmpModeBtn" onclick="bmpToggleMode()"><i class="fas fa-pen"></i> Vẽ</button>
                 </div>
                 <div class="edit-body">
                     <div class="canvas-wrap"><canvas id="bmpCanvas"></canvas></div>
-                    <div class="side-panel">
-                        <div class="hdr"><span>HEX</span><span class="cp" onclick="bmpCopyHex()"><i class="fas fa-copy"></i> 📋 SAO CHÉP HEX</span></div>
-                        <div class="body" id="bmpHex"></div>
+                    <div class="hex-bar">
+                        <span class="hb-label">HEX:</span>
+                        <span class="hb-text" id="bmpHex"></span>
+                        <span class="hb-copy" onclick="bmpCopyHex()"><i class="fas fa-copy"></i> SAO CHÉP</span>
                     </div>
                 </div>
             </div>
@@ -149,14 +138,15 @@
                     <button class="tool-btn" onclick="document.getElementById('pxImgInput').click()"><i class="fas fa-upload"></i> Tải ảnh</button>
                     <input type="file" id="pxImgInput" accept="image/*" style="display:none" onchange="pxLoadImage(event)">
                     <button class="tool-btn danger" onclick="pxClear()"><i class="fas fa-trash"></i> Xoá</button>
-                    <button class="tool-btn primary active" id="pxModeBtn" onclick="pxToggleMode()"><i class="fas fa-pen"></i> Vẽ</button>
                     <button class="tool-btn" onclick="pxUndo()"><i class="fas fa-undo"></i> ↩️</button>
+                    <button class="tool-btn primary active" id="pxModeBtn" onclick="pxToggleMode()"><i class="fas fa-pen"></i> Vẽ</button>
                 </div>
                 <div class="edit-body">
                     <div class="canvas-wrap"><canvas id="pxCanvas"></canvas></div>
-                    <div class="side-panel">
-                        <div class="hdr"><span>HEX</span><span class="cp" onclick="pxCopyCmd()"><i class="fas fa-copy"></i> 📋 SAO CHÉP</span></div>
-                        <div class="body" id="pxHex"></div>
+                    <div class="hex-bar">
+                        <span class="hb-label">HEX:</span>
+                        <span class="hb-text" id="pxHex"></span>
+                        <span class="hb-copy" onclick="pxCopyHex()"><i class="fas fa-copy"></i> SAO CHÉP</span>
                     </div>
                 </div>
             </div>
@@ -171,10 +161,11 @@
                     <span style="color:var(--text2);font-size:12px;margin-left:8px">Kéo để vẽ line</span>
                 </div>
                 <div class="edit-body">
-                    <div class="canvas-wrap"><canvas id="lineCanvas" class="draw-canvas"></canvas></div>
-                    <div class="side-panel">
-                        <div class="hdr"><span>ROP</span><span class="cp" onclick="lineCopy()"><i class="fas fa-copy"></i> 📋 SAO CHÉP</span></div>
-                        <div class="body" id="lineHex">Kéo chuột để vẽ line</div>
+                    <div class="canvas-wrap"><canvas id="lineCanvas"></canvas></div>
+                    <div class="hex-bar">
+                        <span class="hb-label">ROP:</span>
+                        <span class="hb-text" id="lineHex">Kéo chuột để vẽ</span>
+                        <span class="hb-copy" onclick="lineCopy()"><i class="fas fa-copy"></i> SAO CHÉP</span>
                     </div>
                 </div>
                 <div class="line-info" id="lineInfo">192×63 | Kéo chuột để vẽ đường thẳng</div>
@@ -183,263 +174,150 @@
     </div>
 
 <script>
-// === UTILITIES ===
-const HEX = '0123456789ABCDEF';
-function toHex(bytes) { return bytes.map(b => HEX[(b>>4)&15] + HEX[b&15]).join(' '); }
+const HEX='0123456789ABCDEF';
+function toHex(b){return b.map(x=>HEX[(x>>4)&15]+HEX[x&15]).join(' ')}
+function decToHex(n){return HEX[(n>>4)&15]+HEX[n&15]}
 
-// === TAB SWITCHING ===
-function switchTab(name) {
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.topbar .tab').forEach(t => t.classList.remove('active'));
-    document.getElementById('panel-' + name).classList.add('active');
-    document.querySelector(`.topbar .tab[data-tab="${name}"]`).classList.add('active');
-}
+function switchTab(n){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.topbar .tab').forEach(t=>t.classList.remove('active'));document.getElementById('panel-'+n).classList.add('active');document.querySelector('.topbar .tab[data-tab="'+n+'"]').classList.add('active')}
+function switchSub(n){document.querySelectorAll('.sub-panel').forEach(p=>p.style.display='none');document.querySelectorAll('.subtab').forEach(t=>t.classList.remove('active'));document.getElementById('sub-'+n).style.display='flex';document.querySelector('.subtab[data-sub="'+n+'"]').classList.add('active');if(n==='bitmap')bmpInit();if(n==='pixel')pxInit();if(n==='line')lineInit()}
 
-function switchSub(name) {
-    document.querySelectorAll('.sub-panel').forEach(p => p.style.display = 'none');
-    document.querySelectorAll('.subtab').forEach(t => t.classList.remove('active'));
-    document.getElementById('sub-' + name).style.display = 'flex';
-    document.querySelector(`.subtab[data-sub="${name}"]`).classList.add('active');
-    if (name === 'bitmap') bmpInit();
-    if (name === 'pixel') pxInit();
-    if (name === 'line') lineInit();
-}
-
-// ===== DỊCH ẢNH =====
-let _imgData = null;
-function loadImage(e) {
-    const file = e.target.files[0];
-    if (!file) return;
+// IMAGE
+let _img=null;
+function loadImage(e){const f=e.target.files[0];if(!f)return;new FileReader().onload=ev=>{const i=new Image();i.onload=function(){_img=i;convertImg()};i.src=ev.target.result}.bind(this).call(this,{target:{result:URL.createObjectURL(f)}})}
+// Actually fix the load:
+document.getElementById('imgInput').addEventListener('change', function(e) {
+    const file = e.target.files[0]; if (!file) return;
     const reader = new FileReader();
-    reader.onload = function(ev) {
-        const img = new Image();
-        img.onload = function() { _imgData = img; convertImage(); };
-        img.src = ev.target.result;
-    };
+    reader.onload = function(ev) { const img = new Image(); img.onload = function() { _img = img; convertImg(); }; img.src = ev.target.result; };
     reader.readAsDataURL(file);
-}
+});
 
-function convertImage() {
-    if (!_imgData) return;
-    const canvas = document.getElementById('previewCanvas');
-    canvas.width = 192; canvas.height = 63;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(_imgData, 0, 0, 192, 63);
-    const imageData = ctx.getImageData(0, 0, 192, 63);
-    const pixels = imageData.data;
+function convertImg() {
+    if (!_img) return;
+    const th = +document.getElementById('imgThreshold').value || 128;
+    const c = document.getElementById('previewCanvas'); c.width = 384; c.height = 126;
+    const ctx = c.getContext('2d'); ctx.drawImage(_img, 0, 0, 384, 126);
+    const d = ctx.getImageData(0, 0, 384, 126).data;
+    // Create 192x63 black/white
     const bytes = [];
-
     for (let y = 0; y < 63; y++) {
         for (let x = 0; x < 192; x += 8) {
             let byte = 0;
-            for (let b = 0; b < 8; b++) {
-                if (x + b >= 192) continue;
-                const idx = (y * 192 + x + b) * 4;
-                const gray = pixels[idx] * 0.299 + pixels[idx+1] * 0.587 + pixels[idx+2] * 0.114;
-                if (gray < 128) byte |= (1 << (7 - b));
+            for (let b = 0; b < 8; b++) { if (x+b >= 192) continue;
+                const gray = d[(y*2*384 + x*2 + b) * 4] * 0.299 + d[(y*2*384 + x*2 + b) * 4 + 1] * 0.587 + d[(y*2*384 + x*2 + b) * 4 + 2] * 0.114;
+                if (gray < th) byte |= (1 << (7-b));
             }
             bytes.push(byte);
         }
     }
-
-    // Render B/W preview
-    for (let y = 0; y < 63; y++) {
-        for (let x = 0; x < 192; x++) {
-            const byteIdx = y * 24 + Math.floor(x / 8);
-            const on = (bytes[byteIdx] >> (7 - (x % 8))) & 1;
-            const idx = (y * 192 + x) * 4;
+    // Render B/W preview on 384x126 canvas
+    const id = ctx.getImageData(0, 0, 384, 126);
+    for (let y = 0; y < 63; y++) for (let x = 0; x < 192; x++) {
+        const on = (bytes[y*24 + Math.floor(x/8)] >> (7 - x%8)) & 1;
+        for (let dy = 0; dy < 2; dy++) for (let dx = 0; dx < 2; dx++) {
+            const idx = ((y*2+dy)*384 + x*2+dx)*4;
             const val = on ? 0 : 255;
-            pixels[idx] = val; pixels[idx+1] = val; pixels[idx+2] = val;
+            id.data[idx] = val; id.data[idx+1] = val; id.data[idx+2] = val; id.data[idx+3] = 255;
         }
     }
-    ctx.putImageData(imageData, 0, 0);
+    ctx.putImageData(id, 0, 0);
     document.getElementById('imageHex').textContent = toHex(bytes);
 }
 
-function copyImageHex() {
-    const t = document.getElementById('imageHex').textContent;
-    if (t && t !== 'Chưa có ảnh') navigator.clipboard.writeText(t.replace(/\s/g, ' ')).catch(()=>{});
-}
+function copyImageHex(){const t=document.getElementById('imageHex').textContent;if(t&&t!=='Chưa có ảnh')navigator.clipboard.writeText(t).catch(()=>{})}
 
-// ===== BITMAP =====
-let bmpD = [], bmpH = [], bmpMode = 'draw';
-function bmpInit() {
-    const w = +document.getElementById('bmpW').value || 24, h = +document.getElementById('bmpH').value || 16, z = +document.getElementById('bmpZoom').value || 16;
-    if (w < 1 || w > 192 || h < 1 || h > 63) return;
-    if (!bmpD.length) { bmpD = new Uint8Array(h * Math.ceil(w/8)); bmpH = [new Uint8Array(bmpD)]; }
-    const canvas = document.getElementById('bmpCanvas');
-    canvas.width = w * z; canvas.height = h * z;
-    bmpRender(w, h, z);
-    bmpUpdateHex(w, h);
-    canvas.onmousedown = e => bmpStart(e, w, h, z);
-    canvas.onmousemove = e => bmpMove(e, w, h, z);
-    canvas.onmouseup = () => bmpEnd(w, h);
-    canvas.onmouseleave = () => bmpEnd(w, h);
-}
+// BITMAP
+let bmpD=[],bmpH=[],bmpMode='draw';
+function bmpInit(){const w=+document.getElementById('bmpW').value||24,h=+document.getElementById('bmpH').value||16,z=+document.getElementById('bmpZoom').value||16;if(w<1||w>192||h<1||h>63)return;if(!bmpD.length){bmpD=new Uint8Array(h*Math.ceil(w/8));bmpH=[new Uint8Array(bmpD)]}const c=document.getElementById('bmpCanvas');c.width=w*z;c.height=h*z;bmpRender(w,h,z);bmpUpdateHex(w,h);c.onmousedown=e=>bmpStart(e,w,h,z);c.onmousemove=e=>bmpMove(e,w,h,z);c.onmouseup=()=>bmpEnd(w,h);c.onmouseleave=()=>bmpEnd(w,h)}
+function bmpRender(w,h,z){const ctx=document.getElementById('bmpCanvas').getContext('2d');const bw=Math.ceil(w/8);ctx.fillStyle='#fff';ctx.fillRect(0,0,w*z,h*z);for(let y=0;y<h;y++)for(let x=0;x<w;x++){const on=(bmpD[y*bw+Math.floor(x/8)]>>(7-x%8))&1;if(on){ctx.fillStyle='#000';ctx.fillRect(x*z,y*z,z,z)}}ctx.strokeStyle='#ccc';ctx.lineWidth=0.5;for(let x=0;x<=w;x++){ctx.beginPath();ctx.moveTo(x*z,0);ctx.lineTo(x*z,h*z);ctx.stroke()}for(let y=0;y<=h;y++){ctx.beginPath();ctx.moveTo(0,y*z);ctx.lineTo(w*z,y*z);ctx.stroke()}}
+function bmpToggleMode(){bmpMode=bmpMode==='draw'?'erase':'draw';const b=document.getElementById('bmpModeBtn');b.innerHTML=bmpMode==='draw'?'<i class="fas fa-pen"></i> Vẽ':'<i class="fas fa-eraser"></i> Xoá';b.classList.toggle('primary',bmpMode==='draw')}
+let _bmpD=false;
+function bmpStart(e,w,h,z){_bmpD=true;bmpPaint(e,w,h,z)}
+function bmpMove(e,w,h,z){if(_bmpD)bmpPaint(e,w,h,z)}
+function bmpEnd(w,h){if(!_bmpD)return;_bmpD=false;bmpH.push(new Uint8Array(bmpD));if(bmpH.length>50)bmpH.shift();bmpUpdateHex(w,h)}
+function bmpPaint(e,w,h,z){const r=e.target.getBoundingClientRect(),x=Math.floor((e.clientX-r.left)/z),y=Math.floor((e.clientY-r.top)/z);if(x<0||x>=w||y<0||y>=h)return;const bw=Math.ceil(w/8),bi=y*bw+Math.floor(x/8),bt=7-x%8;if(bmpMode==='draw')bmpD[bi]|=(1<<bt);else bmpD[bi]&=~(1<<bt);const ctx=e.target.getContext('2d');ctx.fillStyle=(bmpD[bi]>>bt)&1?'#000':(x%2===y%2?'#fff':'#f8f8f8');ctx.fillRect(x*z,y*z,z,z)}
+function bmpClear(){const w=+document.getElementById('bmpW').value||24,h=+document.getElementById('bmpH').value||16;bmpD=new Uint8Array(h*Math.ceil(w/8));bmpH=[new Uint8Array(bmpD)];bmpInit()}
+function bmpUndo(){if(bmpH.length>1){bmpH.pop();bmpD=new Uint8Array(bmpH[bmpH.length-1]);bmpInit()}}
+function bmpUpdateHex(w,h){document.getElementById('bmpHex').textContent=toHex(Array.from(bmpD))}
+function bmpCopyHex(){navigator.clipboard.writeText(document.getElementById('bmpHex').textContent).catch(()=>{})}
 
-function bmpRender(w, h, z) {
-    const ctx = document.getElementById('bmpCanvas').getContext('2d');
-    const bw = Math.ceil(w/8);
-    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-        const on = (bmpD[y * bw + Math.floor(x/8)] >> (7 - x%8)) & 1;
-        ctx.fillStyle = on ? '#fff' : '#111';
-        ctx.fillRect(x*z, y*z, z, z);
-    }
-    ctx.strokeStyle = '#333'; ctx.lineWidth = 0.5;
-    for (let x = 0; x <= w; x++) { ctx.beginPath(); ctx.moveTo(x*z,0); ctx.lineTo(x*z,h*z); ctx.stroke(); }
-    for (let y = 0; y <= h; y++) { ctx.beginPath(); ctx.moveTo(0,y*z); ctx.lineTo(w*z,y*z); ctx.stroke(); }
-}
+// PIXEL
+let pxD=[],pxH=[],pxMode='draw';
+function pxInit(){const w=+document.getElementById('pxW').value||24,h=+document.getElementById('pxH').value||16,z=+document.getElementById('pxZoom').value||16;if(w<1||w>192||h<1||h>63)return;if(!pxD.length){pxD=new Uint8Array(h*Math.ceil(w/8));pxH=[new Uint8Array(pxD)]}const c=document.getElementById('pxCanvas');c.width=w*z;c.height=h*z;pxRender(w,h,z);pxUpdateHex(w,h);c.onmousedown=e=>pxStart(e,w,h,z);c.onmousemove=e=>pxMove(e,w,h,z);c.onmouseup=()=>pxEnd(w,h);c.onmouseleave=()=>pxEnd(w,h)}
+function pxRender(w,h,z){const ctx=document.getElementById('pxCanvas').getContext('2d');const bw=Math.ceil(w/8);ctx.fillStyle='#fff';ctx.fillRect(0,0,w*z,h*z);for(let y=0;y<h;y++)for(let x=0;x<w;x++){const on=(pxD[y*bw+Math.floor(x/8)]>>(7-x%8))&1;if(on){ctx.fillStyle='#000';ctx.fillRect(x*z,y*z,z,z)}}ctx.strokeStyle='#ccc';ctx.lineWidth=0.5;for(let x=0;x<=w;x++){ctx.beginPath();ctx.moveTo(x*z,0);ctx.lineTo(x*z,h*z);ctx.stroke()}for(let y=0;y<=h;y++){ctx.beginPath();ctx.moveTo(0,y*z);ctx.lineTo(w*z,y*z);ctx.stroke()}}
+function pxToggleMode(){pxMode=pxMode==='draw'?'erase':'draw';const b=document.getElementById('pxModeBtn');b.innerHTML=pxMode==='draw'?'<i class="fas fa-pen"></i> Vẽ':'<i class="fas fa-eraser"></i> Tẩy';b.classList.toggle('primary',pxMode==='draw')}
+let _pxD=false;
+function pxStart(e,w,h,z){_pxD=true;pxPaint(e,w,h,z)}
+function pxMove(e,w,h,z){if(_pxD)pxPaint(e,w,h,z)}
+function pxEnd(w,h){if(!_pxD)return;_pxD=false;pxH.push(new Uint8Array(pxD));if(pxH.length>50)pxH.shift();pxUpdateHex(w,h)}
+function pxPaint(e,w,h,z){const r=e.target.getBoundingClientRect(),x=Math.floor((e.clientX-r.left)/z),y=Math.floor((e.clientY-r.top)/z);if(x<0||x>=w||y<0||y>=h)return;const bw=Math.ceil(w/8),bi=y*bw+Math.floor(x/8),bt=7-x%8;if(pxMode==='draw')pxD[bi]|=(1<<bt);else pxD[bi]&=~(1<<bt);const ctx=e.target.getContext('2d');ctx.fillStyle=(pxD[bi]>>bt)&1?'#000':(x%2===y%2?'#fff':'#f8f8f8');ctx.fillRect(x*z,y*z,z,z)}
+function pxClear(){const w=+document.getElementById('pxW').value||24,h=+document.getElementById('pxH').value||16;pxD=new Uint8Array(h*Math.ceil(w/8));pxH=[new Uint8Array(pxD)];pxInit()}
+function pxUndo(){if(pxH.length>1){pxH.pop();pxD=new Uint8Array(pxH[pxH.length-1]);pxInit()}}
+function pxUpdateHex(w,h){document.getElementById('pxHex').textContent=toHex(Array.from(pxD))}
+function pxCopyHex(){navigator.clipboard.writeText(document.getElementById('pxHex').textContent).catch(()=>{})}
+function pxLoadImage(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=function(ev){const i=new Image();i.onload=function(){const w=+document.getElementById('pxW').value||24,h=+document.getElementById('pxH').value||16;const c=document.createElement('canvas');c.width=w;c.height=h;const ctx=c.getContext('2d');ctx.drawImage(i,0,0,w,h);const d=ctx.getImageData(0,0,w,h).data;const bw=Math.ceil(w/8);pxD=new Uint8Array(h*bw);for(let y=0;y<h;y++)for(let x=0;x<w;x++){const idx=(y*w+x)*4,g=d[idx]*0.299+d[idx+1]*0.587+d[idx+2]*0.114;if(g<128)pxD[y*bw+Math.floor(x/8)]|=(1<<(7-x%8))}pxH=[new Uint8Array(pxD)];pxInit()};i.src=ev.target.result};r.readAsDataURL(f);e.target.value=''}
 
-function bmpToggleMode() {
-    bmpMode = bmpMode === 'draw' ? 'erase' : 'draw';
-    const btn = document.getElementById('bmpModeBtn');
-    btn.innerHTML = bmpMode === 'draw' ? '<i class="fas fa-pen"></i> Vẽ' : '<i class="fas fa-eraser"></i> Xoá';
-    btn.classList.toggle('primary', bmpMode === 'draw');
-}
+// LINE DRAW
+let lP=[],lH=[],lD=false,lS=null;
+function lineInit(){const z=+document.getElementById('lineZoom').value||8;const c=document.getElementById('lineCanvas');c.width=192*z;c.height=63*z;if(!lP.length){lP=Array.from({length:63},()=>Array(192).fill(false));lH=[]}lineRender(z);lineGenRop();c.onmousedown=e=>{lD=true;const r=c.getBoundingClientRect();lS={x:Math.max(0,Math.min(191,Math.floor((e.clientX-r.left)/z))),y:Math.max(0,Math.min(62,Math.floor((e.clientY-r.top)/z)))};lH.push(lP.map(r=>[...r]));if(lH.length>50)lH.shift()};c.onmousemove=e=>{if(!lD||!lS)return;const r=c.getBoundingClientRect(),x=Math.max(0,Math.min(191,Math.floor((e.clientX-r.left)/z))),y=Math.max(0,Math.min(62,Math.floor((e.clientY-r.top)/z)));lP=lH[lH.length-1].map(r=>[...r]);lineDraw(lS.x,lS.y,x,y);lineRender(z);document.getElementById('lineInfo').textContent=lS.x+':'+lS.y+' > '+x+':'+y};c.onmouseup=()=>{if(!lD)return;lD=false;lS=null;lineGenRop()};c.onmouseleave=()=>{if(!lD)return;lD=false;lS=null;lineGenRop()}}
 
-let _bmpD = false;
-function bmpStart(e, w, h, z) { _bmpD = true; bmpPaint(e, w, h, z); }
-function bmpMove(e, w, h, z) { if (_bmpD) bmpPaint(e, w, h, z); }
-function bmpEnd(w, h) { if (!_bmpD) return; _bmpD = false; bmpH.push(new Uint8Array(bmpD)); if (bmpH.length > 50) bmpH.shift(); bmpUpdateHex(w, h); }
+function lineDraw(x1,y1,x2,y2){const dx=Math.abs(x2-x1),dy=Math.abs(y2-y1),sx=x1<x2?1:-1,sy=y1<y2?1:-1;let err=dx-dy;while(true){if(x1>=0&&x1<192&&y1>=0&&y1<63)lP[y1][x1]=true;if(x1===x2&&y1===y2)break;const e2=2*err;if(e2>-dy){err-=dy;x1+=sx}if(e2<dx){err+=dx;y1+=sy}}}
 
-function bmpPaint(e, w, h, z) {
-    const r = e.target.getBoundingClientRect(), x = Math.floor((e.clientX - r.left)/z), y = Math.floor((e.clientY - r.top)/z);
-    if (x < 0 || x >= w || y < 0 || y >= h) return;
-    const bw = Math.ceil(w/8), bi = y * bw + Math.floor(x/8), bt = 7 - x%8;
-    if (bmpMode === 'draw') bmpD[bi] |= (1 << bt); else bmpD[bi] &= ~(1 << bt);
-    const ctx = e.target.getContext('2d');
-    ctx.fillStyle = (bmpD[bi] >> bt) & 1 ? '#fff' : '#111';
-    ctx.fillRect(x*z, y*z, z, z);
-}
+function lineRender(z){const ctx=document.getElementById('lineCanvas').getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,192*z,63*z);for(let y=0;y<63;y++)for(let x=0;x<192;x++){if(lP[y][x]){ctx.fillStyle='#000';ctx.fillRect(x*z,y*z,z,z)}}ctx.strokeStyle='#ccc';ctx.lineWidth=0.5;for(let x=0;x<=192;x++){ctx.beginPath();ctx.moveTo(x*z,0);ctx.lineTo(x*z,63*z);ctx.stroke()}for(let y=0;y<=63;y++){ctx.beginPath();ctx.moveTo(0,y*z);ctx.lineTo(192*z,y*z);ctx.stroke()}}
 
-function bmpClear() { const w = +document.getElementById('bmpW').value||24, h = +document.getElementById('bmpH').value||16; bmpD = new Uint8Array(h * Math.ceil(w/8)); bmpH = [new Uint8Array(bmpD)]; bmpInit(); }
-function bmpUndo() { if (bmpH.length > 1) { bmpH.pop(); bmpD = new Uint8Array(bmpH[bmpH.length-1]); bmpInit(); } }
-function bmpUpdateHex(w, h) { document.getElementById('bmpHex').textContent = toHex(Array.from(bmpD)); }
-function bmpCopyHex() { navigator.clipboard.writeText(document.getElementById('bmpHex').textContent).catch(()=>{}); }
+function lineClear(){lP=Array.from({length:63},()=>Array(192).fill(false));lH=[];lineInit()}
+function lineUndo(){if(lH.length){lP=lH.pop().map(r=>[...r]);lineInit()}}
 
-// ===== PIXEL =====
-let pxD = [], pxH = [], pxMode = 'draw';
-function pxInit() {
-    const w = +document.getElementById('pxW').value||24, h = +document.getElementById('pxH').value||16, z = +document.getElementById('pxZoom').value||16;
-    if (w < 1 || w > 192 || h < 1 || h > 63) return;
-    if (!pxD.length) { pxD = new Uint8Array(h * Math.ceil(w/8)); pxH = [new Uint8Array(pxD)]; }
-    const canvas = document.getElementById('pxCanvas');
-    canvas.width = w * z; canvas.height = h * z;
-    pxRender(w, h, z);
-    pxUpdateHex(w, h);
-    canvas.onmousedown = e => pxStart(e, w, h, z);
-    canvas.onmousemove = e => pxMove(e, w, h, z);
-    canvas.onmouseup = () => pxEnd(w, h);
-    canvas.onmouseleave = () => pxEnd(w, h);
-}
-
-function pxRender(w, h, z) {
-    const ctx = document.getElementById('pxCanvas').getContext('2d');
-    const bw = Math.ceil(w/8);
-    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-        const on = (pxD[y * bw + Math.floor(x/8)] >> (7 - x%8)) & 1;
-        ctx.fillStyle = on ? '#fff' : '#111';
-        ctx.fillRect(x*z, y*z, z, z);
-    }
-    ctx.strokeStyle = '#333'; ctx.lineWidth = 0.5;
-    for (let x = 0; x <= w; x++) { ctx.beginPath(); ctx.moveTo(x*z,0); ctx.lineTo(x*z,h*z); ctx.stroke(); }
-    for (let y = 0; y <= h; y++) { ctx.beginPath(); ctx.moveTo(0,y*z); ctx.lineTo(w*z,y*z); ctx.stroke(); }
-}
-
-function pxToggleMode() {
-    pxMode = pxMode === 'draw' ? 'erase' : 'draw';
-    const btn = document.getElementById('pxModeBtn');
-    btn.innerHTML = pxMode === 'draw' ? '<i class="fas fa-pen"></i> Vẽ' : '<i class="fas fa-eraser"></i> Tẩy';
-    btn.classList.toggle('primary', pxMode === 'draw');
-}
-
-let _pxD = false;
-function pxStart(e, w, h, z) { _pxD = true; pxPaint(e, w, h, z); }
-function pxMove(e, w, h, z) { if (_pxD) pxPaint(e, w, h, z); }
-function pxEnd(w, h) { if (!_pxD) return; _pxD = false; pxH.push(new Uint8Array(pxD)); if (pxH.length > 50) pxH.shift(); pxUpdateHex(w, h); }
-
-function pxPaint(e, w, h, z) {
-    const r = e.target.getBoundingClientRect(), x = Math.floor((e.clientX - r.left)/z), y = Math.floor((e.clientY - r.top)/z);
-    if (x < 0 || x >= w || y < 0 || y >= h) return;
-    const bw = Math.ceil(w/8), bi = y * bw + Math.floor(x/8), bt = 7 - x%8;
-    if (pxMode === 'draw') pxD[bi] |= (1 << bt); else pxD[bi] &= ~(1 << bt);
-    const ctx = e.target.getContext('2d');
-    ctx.fillStyle = (pxD[bi] >> bt) & 1 ? '#fff' : '#111';
-    ctx.fillRect(x*z, y*z, z, z);
-}
-
-function pxClear() { const w = +document.getElementById('pxW').value||24, h = +document.getElementById('pxH').value||16; pxD = new Uint8Array(h * Math.ceil(w/8)); pxH = [new Uint8Array(pxD)]; pxInit(); }
-function pxUndo() { if (pxH.length > 1) { pxH.pop(); pxD = new Uint8Array(pxH[pxH.length-1]); pxInit(); } }
-function pxUpdateHex(w, h) { document.getElementById('pxHex').textContent = toHex(Array.from(pxD)); }
-function pxCopyCmd() { navigator.clipboard.writeText(document.getElementById('pxHex').textContent).catch(()=>{}); }
-
-function pxLoadImage(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = function(ev) {
-        const img = new Image();
-        img.onload = function() {
-            const w = +document.getElementById('pxW').value||24, h = +document.getElementById('pxH').value||16;
-            const c = document.createElement('canvas'); c.width = w; c.height = h;
-            const ctx = c.getContext('2d'); ctx.drawImage(img, 0, 0, w, h);
-            const d = ctx.getImageData(0, 0, w, h).data;
-            const bw = Math.ceil(w/8);
-            pxD = new Uint8Array(h * bw);
-            for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-                const i = (y * w + x) * 4, g = d[i]*0.299 + d[i+1]*0.587 + d[i+2]*0.114;
-                if (g < 128) pxD[y * bw + Math.floor(x/8)] |= (1 << (7 - x%8));
+function lineGenRop(){
+    // Collect all line segments from pixels (simplified: group connected pixels)
+    const visited = Array.from({length:63},()=>Array(192).fill(false));
+    const lines = [];
+    
+    function findLine(startX, startY) {
+        let minX=startX, minY=startY, maxX=startX, maxY=startY;
+        const queue = [[startX, startY]];
+        visited[startY][startX] = true;
+        while (queue.length > 0) {
+            const [cx, cy] = queue.shift();
+            minX = Math.min(minX, cx); maxX = Math.max(maxX, cx);
+            minY = Math.min(minY, cy); maxY = Math.max(maxY, cy);
+            for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+                if (dx === 0 && dy === 0) continue;
+                const nx = cx+dx, ny = cy+dy;
+                if (nx >= 0 && nx < 192 && ny >= 0 && ny < 63 && lP[ny][nx] && !visited[ny][nx]) {
+                    visited[ny][nx] = true;
+                    queue.push([nx, ny]);
+                }
             }
-            pxH = [new Uint8Array(pxD)];
-            pxInit();
-        };
-        img.src = ev.target.result;
-    };
-    reader.readAsDataURL(file);
-    e.target.value = '';
+        }
+        return { x1: minX, y1: minY, x2: maxX, y2: maxY };
+    }
+    
+    for (let y = 0; y < 63; y++) for (let x = 0; x < 192; x++) {
+        if (lP[y][x] && !visited[y][x]) lines.push(findLine(x, y));
+    }
+    
+    if (lines.length === 0) {
+        document.getElementById('lineHex').textContent = 'Kéo chuột để vẽ line';
+        return;
+    }
+    
+    // Generate ROP code for each line
+    let rop = '';
+    lines.forEach((line, i) => {
+        const x1h = decToHex(line.x1), y1h = decToHex(line.y1);
+        const x2h = decToHex(line.x2), y2h = decToHex(line.y2);
+        if (i > 0) rop += '\n';
+        rop += 'xr0 = hex ' + x1h + ' ' + y1h + ' ' + x2h + ' ' + y2h + '\n';
+        rop += 'line_draw';
+    });
+    
+    document.getElementById('lineHex').textContent = rop;
 }
 
-// ===== LINE DRAW =====
-let lP = [], lH = [], lD = false, lS = null;
-function lineInit() {
-    const z = +document.getElementById('lineZoom').value || 8;
-    const c = document.getElementById('lineCanvas'); c.width = 192*z; c.height = 63*z;
-    if (!lP.length) { lP = Array.from({length:63}, () => Array(192).fill(false)); lH = []; }
-    lineRender(z);
-    c.onmousedown = e => { lD = true; const r = c.getBoundingClientRect(); lS = {x:Math.max(0,Math.min(191,Math.floor((e.clientX-r.left)/z))), y:Math.max(0,Math.min(62,Math.floor((e.clientY-r.top)/z)))}; lH.push(lP.map(r=>[...r])); if(lH.length>50)lH.shift(); };
-    c.onmousemove = e => { if (!lD || !lS) return; const r = c.getBoundingClientRect(), x = Math.max(0,Math.min(191,Math.floor((e.clientX-r.left)/z))), y = Math.max(0,Math.min(62,Math.floor((e.clientY-r.top)/z))); lP = lH[lH.length-1].map(r=>[...r]); drawLine(lS.x,lS.y,x,y); lineRender(z); document.getElementById('lineHex').textContent = `${lS.x}:${lS.y} > ${x}:${y}`; };
-    c.onmouseup = () => { if (!lD) return; lD = false; lS = null; lineGenRop(); };
-    c.onmouseleave = () => { if (!lD) return; lD = false; lS = null; lineGenRop(); };
-    lineGenRop();
-}
+function lineCopy(){const t=document.getElementById('lineHex').textContent;if(t&&!t.includes('Kéo'))navigator.clipboard.writeText(t).catch(()=>{})}
 
-function drawLine(x1,y1,x2,y2) {
-    const dx=Math.abs(x2-x1), dy=Math.abs(y2-y1), sx=x1<x2?1:-1, sy=y1<y2?1:-1;
-    let err=dx-dy;
-    while(true) { if(x1>=0&&x1<192&&y1>=0&&y1<63) lP[y1][x1]=true; if(x1===x2&&y1===y2) break; const e2=2*err; if(e2>-dy){err-=dy;x1+=sx;} if(e2<dx){err+=dx;y1+=sy;} }
-}
-
-function lineRender(z) {
-    const ctx = document.getElementById('lineCanvas').getContext('2d');
-    for (let y = 0; y < 63; y++) for (let x = 0; x < 192; x++) { ctx.fillStyle = lP[y][x] ? '#fff' : '#111'; ctx.fillRect(x*z, y*z, z, z); }
-    ctx.strokeStyle = '#333'; ctx.lineWidth = 0.5;
-    for (let x = 0; x <= 192; x++) { ctx.beginPath(); ctx.moveTo(x*z,0); ctx.lineTo(x*z,63*z); ctx.stroke(); }
-    for (let y = 0; y <= 63; y++) { ctx.beginPath(); ctx.moveTo(0,y*z); ctx.lineTo(192*z,y*z); ctx.stroke(); }
-}
-
-function lineClear() { lP = Array.from({length:63}, () => Array(192).fill(false)); lH = []; lineInit(); }
-function lineUndo() { if (lH.length) { lP = lH.pop().map(r=>[...r]); lineInit(); } }
-
-function lineGenRop() {
-    let r = '';
-    for (let y = 0; y < 63; y++) for (let x = 0; x < 192; x++) if (lP[y][x]) r += x + ':' + y + ' ';
-    document.getElementById('lineHex').textContent = r || 'Kéo chuột để vẽ line';
-}
-
-function lineCopy() { const t = document.getElementById('lineHex').textContent; if (t && !t.includes('Kéo')) navigator.clipboard.writeText(t).catch(()=>{}); }
-
-// === INIT ===
-document.addEventListener('DOMContentLoaded', () => { bmpInit(); pxInit(); lineInit(); });
+document.addEventListener('DOMContentLoaded',()=>{bmpInit();pxInit();lineInit()});
 </script>
 </body>
 </html>
