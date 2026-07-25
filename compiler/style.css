@@ -517,6 +517,7 @@ body {
     top: 0;
     left: 0;
     z-index: 2;
+    user-select: text;
 }
 
 .editor-highlight {
@@ -562,6 +563,7 @@ body {
     background: var(--bg);
     white-space: pre-wrap;
     line-height: 1.5;
+    user-select: text;
 }
 
 .output-area .addr {
