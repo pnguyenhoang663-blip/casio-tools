@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASM Compiler</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <input type="file" id="fileInput" style="display:none" accept=".asm">
+    <input type="file" id="projectInput" style="display:none" accept=".json">
+
+    <!-- Toolbar 1 -->
+    <div class="toolbar" id="toolbar1">
+        <button class="tool-btn" onclick="loadAsmFile()"><i class="fas fa-folder-open"></i> Load</button>
+        <button class="tool-btn" onclick="saveAsmFile()"><i class="fas fa-save"></i> Save</button>
+        <span class="sep"></span>
+        <button class="tool-btn" onclick="showLoadTab()"><i class="fas fa-folder"></i> Load tab</button>
+        <button class="tool-btn" onclick="saveCurrentTab()"><i class="fas fa-archive"></i> Save tab</button>
+        <span class="sep"></span>
+        <button class="tool-btn" onclick="undo()"><i class="fas fa-undo"></i></button>
+        <button class="tool-btn" onclick="redo()"><i class="fas fa-redo"></i></button>
+        <span class="sep"></span>
+        <div class="dropdown-wrap" id="settingsDropdown">
+            <button class="tool-btn" onclick="showSettings()"><i class="fas fa-cog"></i> Cài đặt</button>
+        </div>
+        <div class="spacer"></div>
+        <button class="tool-btn" onclick="exitCompiler()" style="color:var(--red)"><i class="fas fa-sign-out-alt"></i> Thoát</button>
+    </div>
+
+    <!-- Toolbar 2 -->
+    <div class="toolbar" id="toolbar2">
+        <span style="font-size:12px;color:var(--text2);margin-right:4px">Model:</span>
+        <select class="tool-select" id="modelSelect" onchange="onModelChange()">
+            <option value="580vnx">580VNX</option>
+            <option value="880btg">880BTG</option>
+        </select>
+        <span class="sep"></span>
+        <button class="tool-btn" onclick="showLabels()"><i class="fas fa-tags"></i> Label</button>
+        <button class="tool-btn" onclick="showSamples()"><i class="fas fa-file-code"></i> Mẫu asm</button>
+    </div>
+
+    <!-- Toolbar 3 -->
+    <div class="toolbar" id="toolbar3">
+        <button class="tool-btn" onclick="toggleStudio()" id="studioBtn"><i class="fas fa-columns"></i> Studio</button>
+        <span class="sep"></span>
+        <button class="tool-btn red" onclick="clearEditor()"><i class="fas fa-trash"></i> Xóa</button>
+        <button class="tool-btn" onclick="copyContent()"><i class="fas fa-copy"></i> Sao chép</button>
+        <div class="spacer"></div>
+        <button class="tool-btn green" onclick="compileCode()"><i class="fas fa-play"></i> Comp</button>
+    </div>
+
+    <!-- Tab bar -->
+    <div class="tab-bar" id="tabBar">
+        <div class="tab-items" id="tabItems"></div>
+    </div>
+
+    <!-- Main area -->
+    <div class="main-area split" id="mainArea">
+        <!-- Input -->
+        <div class="split-left" id="inputPanel">
+            <div class="panel-header">
+                <span><i class="fas fa-code"></i> Input</span>
+                <div class="actions">
+                    <button class="tool-btn red" onclick="clearEditor()" title="Xóa input"><i class="fas fa-trash"></i></button>
+                    <button class="tool-btn" onclick="copyInput()" title="Sao chép input"><i class="fas fa-copy"></i></button>
+                </div>
+            </div>
+            <div class="editor-wrap line-numbers" id="editorWrap">
+                <div class="line-nums-overlay" id="lineNums"></div>
+                <pre class="editor-highlight" id="highlightArea"><code id="highlightContent"></code></pre>
+                <textarea class="editor-textarea" id="editor" spellcheck="false"
+                    oninput="onEditorInput()" onscroll="syncScroll()"
+                    placeholder="Viết mã ASM..."></textarea>
+            </div>
+        </div>
+        <!-- Output -->
+        <div class="split-right" id="outputPanel">
+            <div class="panel-header">
+                <span><i class="fas fa-terminal"></i> Output</span>
+                <div class="actions">
+                    <button class="tool-btn red" onclick="clearOutput()" title="Xóa output"><i class="fas fa-trash"></i></button>
+                    <button class="tool-btn" onclick="copyOutput()" title="Sao chép output"><i class="fas fa-copy"></i></button>
+                </div>
+            </div>
+            <div class="output-area" id="outputArea"></div>
+        </div>
+        <div class="split-gutter" id="splitGutter"></div>
+    </div>
+
+    <!-- Status bar -->
+    <div class="status-bar">
+        <span>ASM COMPILER V1.0</span>
+        <span>Compiler được làm bởi Luongvantam</span>
+    </div>
+
+    <!-- Labels popup -->
+    <div class="popup-overlay" id="labelsPopup">
+        <div class="popup-box">
+            <div class="popup-header">
+                <span><i class="fas fa-tags"></i> Labels - <span id="labelsModelName">580vnx</span></span>
+                <i class="fas fa-times" onclick="closePopup('labelsPopup')"></i>
+            </div>
+            <div class="popup-body" id="labelsBody"></div>
+        </div>
+    </div>
+
+    <!-- Samples popup -->
+    <div class="popup-overlay" id="samplesPopup">
+        <div class="popup-box">
+            <div class="popup-header">
+                <span><i class="fas fa-file-code"></i> Mẫu ASM - <span id="samplesModelName">580vnx</span></span>
+                <i class="fas fa-times" onclick="closePopup('samplesPopup')"></i>
+            </div>
+            <div class="popup-body" id="samplesBody"></div>
+        </div>
+    </div>
+
+    <!-- Settings popup -->
+    <div class="popup-overlay" id="settingsPopup">
+        <div class="popup-box" style="width:320px">
+            <div class="popup-header">
+                <span><i class="fas fa-cog"></i> Cài đặt</span>
+                <i class="fas fa-times" onclick="closePopup('settingsPopup')"></i>
+            </div>
+            <div class="popup-body" id="settingsBody">
+                <div class="setting-row">
+                    <span><i class="fas fa-font"></i> Font size</span>
+                    <div class="setting-control">
+                        <button class="tool-btn sm" onclick="adjFontSize(-1)"><i class="fas fa-minus"></i></button>
+                        <span id="fontSizeVal" style="min-width:24px;text-align:center;font-weight:600">15</span>
+                        <button class="tool-btn sm" onclick="adjFontSize(1)"><i class="fas fa-plus"></i></button>
+                    </div>
+                </div>
+                <div class="setting-row">
+                    <span><i class="fas fa-palette"></i> Theme</span>
+                    <select class="tool-select" onchange="setTheme(this.value)" id="themeSelect">
+                        <option value="dark">Tối</option>
+                        <option value="light">Sáng</option>
+                        <option value="gray">Xám</option>
+                    </select>
+                </div>
+                <div class="setting-row">
+                    <span><i class="fas fa-indent"></i> Tab size</span>
+                    <select class="tool-select" onchange="setTabSize(this.value)" id="tabSizeSelect">
+                        <option value="2">2</option>
+                        <option value="4" selected>4</option>
+                        <option value="8">8</option>
+                    </select>
+                </div>
+                <div class="setting-row" onclick="toggleWordWrap()">
+                    <span><i class="fas fa-wrap"></i> Xuống dòng</span>
+                    <span class="toggle" id="wrapToggle"></span>
+                </div>
+                <div class="setting-row" onclick="toggleLineNumbers()">
+                    <span><i class="fas fa-list-ol"></i> Số dòng</span>
+                    <span class="toggle on" id="lineToggle"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load Tab popup -->
+    <div class="popup-overlay" id="loadTabPopup">
+        <div class="popup-box" style="width:400px">
+            <div class="popup-header">
+                <span><i class="fas fa-folder-open"></i> Load tab</span>
+                <i class="fas fa-times" onclick="closePopup('loadTabPopup')"></i>
+            </div>
+            <div class="popup-body" id="loadTabBody">
+                <div style="color:var(--text2);padding:12px;text-align:center">Chưa có tab nào được lưu</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Save Tab popup -->
+    <div class="popup-overlay" id="saveTabPopup">
+        <div class="popup-box" style="width:360px">
+            <div class="popup-header">
+                <span><i class="fas fa-save"></i> Save tab</span>
+                <i class="fas fa-times" onclick="closePopup('saveTabPopup')"></i>
+            </div>
+            <div class="popup-body">
+                <div style="margin-bottom:12px;font-size:12px;color:var(--text2)">Nhập tên cho tab hiện tại:</div>
+                <input type="text" id="saveTabInput" class="popup-input"
+                    placeholder="Tên tab..." autofocus
+                    onkeydown="if(event.key==='Enter')confirmSaveTab()">
+                <div style="display:flex;gap:8px;margin-top:14px;justify-content:flex-end">
+                    <button class="tool-btn" onclick="closePopup('saveTabPopup')">Hủy</button>
+                    <button class="tool-btn primary" onclick="confirmSaveTab()"><i class="fas fa-check"></i> Lưu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+        const SERVER = window.location.protocol === 'file:' ? 'http://127.0.0.1:5001' : '';
+        let currentModel = '580vnx';
+        let currentTheme = 'dark';
+        let fontSize = 15;
+        let tabSize = 4;
+        let wordWrap = false;
+        let lineNums = true;
+        let studioMode = true;
+        let history = [];
+        let historyIdx = -1;
+        let tabs = { 'script.rsc': { content: '', dirty: false } };
+        let currentTab = 'script.rsc';
+        let tabCounter = 1;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadState();
+            renderTabs();
+            switchTab('script.rsc');
+            updateLineNums();
+            document.getElementById('editor').addEventListener('keydown', (e) => {
+                if (e.key === 'Tab') { e.preventDefault(); insertTab(); }
+                if (e.ctrlKey && e.key === 'z') { e.preventDefault(); undo(); }
+                if (e.ctrlKey && e.key === 'y') { e.preventDefault(); redo(); }
+                if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveAsmFile(); }
+            });
+        });
+
+        function renderTabs() {
+            const bar = document.getElementById('tabItems');
+            let html = '';
+            Object.keys(tabs).forEach(id => {
+                const active = id === currentTab ? 'active' : '';
+                const dirty = tabs[id].dirty ? 'show' : '';
+                const name = id.split('/').pop();
+                html += '<div class="tab-item ' + active + '" onclick="switchTab(\'' + id + '\')">' +
+                    '<span class="dirty ' + dirty + '"></span><span class="tab-label">' + name + '</span>' +
+                    '<span class="close" onclick="closeTab(event,\'' + id + '\')">&times;</span></div>';
+            });
+            html += '<div class="tab-add" onclick="addTab()"><i class="fas fa-plus"></i></div>';
+            bar.innerHTML = html;
+        }
+
+        function addTab() { tabCounter++; tabs['tab' + tabCounter + '.rsc'] = { content: '', dirty: false }; switchTab('tab' + tabCounter + '.rsc'); }
+        function switchTab(id) { saveCurrentContent(); currentTab = id; document.getElementById('editor').value = tabs[id]?.content || ''; onEditorInput(); renderTabs(); }
+        function closeTab(e, id) { e.stopPropagation(); if (Object.keys(tabs).length <= 1) return; delete tabs[id]; if (currentTab === id) switchTab(Object.keys(tabs).pop()); else renderTabs(); }
+        function saveCurrentContent() { if (tabs[currentTab] !== undefined) tabs[currentTab].content = document.getElementById('editor').value; }
+
+        function undo() { if (historyIdx > 0) { historyIdx--; document.getElementById('editor').value = history[historyIdx]; onEditorInput(); } }
+        function redo() { if (historyIdx < history.length - 1) { historyIdx++; document.getElementById('editor').value = history[historyIdx]; onEditorInput(); } }
+        function pushHistory(val) { history = history.slice(0, historyIdx + 1); history.push(val); if (history.length > 200) history.shift(); historyIdx = history.length - 1; }
+
+        function onEditorInput() {
+            const val = document.getElementById('editor').value;
+            tabs[currentTab].content = val; tabs[currentTab].dirty = true;
+            renderTabs(); updateLineNums(); highlightCode(val); pushHistory(val);
+        }
+
+        function updateLineNums() {
+            const el = document.getElementById('lineNums');
+            if (!lineNums) { el.innerHTML = ''; return; }
+            let s = '';
+            for (let i = 1; i <= document.getElementById('editor').value.split('\n').length; i++) s += i + '\n';
+            el.textContent = s;
+        }
+
+        function highlightCode(code) {
+            let safe = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            safe = safe.replace(/(\/\/.*)/g, '<span style="color:#6a9955">$1</span>');
+            safe = safe.replace(/(#.*)/g, '<span style="color:#6a9955">$1</span>');
+            safe = safe.replace(/\b(org|def|call|goto|return|hex|str|var|reg|as|at|lbl|func|loop|repeat|backup|fill|align|pad|section|set|build|python)\b/gi, '<span style="color:#569cd6;font-weight:bold">$1</span>');
+            safe = safe.replace(/\b(adr_of|adr_arith|pr_length|sizeof|pr_org|pr_backup|dist\.|line\.gadgets)\b/gi, '<span style="color:#c586c0">$1</span>');
+            safe = safe.replace(/\b(er[0-9]|xr[0-9]|qr[0-9]|sp|pc|sr)\b/gi, '<span style="color:#9cdcfe">$1</span>');
+            safe = safe.replace(/\b0x[0-9a-fA-F]+\b/g, '<span style="color:#b5cea8">$&</span>');
+            document.getElementById('highlightContent').innerHTML = safe;
+        }
+
+        function syncScroll() {
+            const ed = document.getElementById('editor');
+            document.getElementById('highlightArea').scrollTop = ed.scrollTop;
+            document.getElementById('highlightArea').scrollLeft = ed.scrollLeft;
+            document.getElementById('lineNums').scrollTop = ed.scrollTop;
+        }
+
+        function insertTab() {
+            const ed = document.getElementById('editor');
+            const start = ed.selectionStart, end = ed.selectionEnd;
+            ed.value = ed.value.substring(0, start) + ' '.repeat(tabSize) + ed.value.substring(end);
+            ed.selectionStart = ed.selectionEnd = start + tabSize;
+            onEditorInput();
+        }
+
+        function loadAsmFile() { document.getElementById('fileInput').click(); }
+        document.getElementById('fileInput').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const name = file.name;
+                if (!tabs[name]) tabs[name] = { content: '', dirty: false };
+                tabs[name].content = ev.target.result;
+                switchTab(name);
+            };
+            reader.readAsText(file);
+            e.target.value = '';
+        });
+
+        function saveAsmFile() {
+            const a = document.createElement('a');
+            a.download = currentTab.split('/').pop();
+            a.href = URL.createObjectURL(new Blob([document.getElementById('editor').value], { type: 'text/plain' }));
+            a.click();
+            URL.revokeObjectURL(a.href);
+        }
+
+        function saveCurrentTab() {
+            saveCurrentContent();
+            document.getElementById('saveTabInput').value = currentTab.split('/').pop();
+            document.getElementById('saveTabPopup').classList.add('show');
+            setTimeout(() => document.getElementById('saveTabInput').focus(), 100);
+        }
+
+        function confirmSaveTab() {
+            const name = document.getElementById('saveTabInput').value.trim();
+            if (!name) return;
+            let saved = JSON.parse(localStorage.getItem('savedTabs') || '{}');
+            saved[name] = { content: document.getElementById('editor').value, model: currentModel, time: Date.now() };
+            localStorage.setItem('savedTabs', JSON.stringify(saved));
+            closePopup('saveTabPopup');
+        }
+
+        function showLoadTab() {
+            const overlay = document.getElementById('loadTabPopup');
+            const body = document.getElementById('loadTabBody');
+            const saved = JSON.parse(localStorage.getItem('savedTabs') || '{}');
+            const keys = Object.keys(saved);
+            if (keys.length === 0) { body.innerHTML = '<div style="color:var(--text2);padding:20px;text-align:center">Chưa có tab nào được lưu</div>'; }
+            else {
+                let html = '';
+                keys.reverse().forEach(name => {
+                    const s = saved[name];
+                    html += '<div class="entry" onclick="loadSavedTab(\'' + name + '\')" style="align-items:center">' +
+                        '<span><i class="fas fa-file"></i> ' + name + '</span>' +
+                        '<span><span style="color:var(--text2);font-size:11px;margin-right:10px">' + new Date(s.time).toLocaleString('vi-VN') + '</span>' +
+                        '<span onclick="event.stopPropagation();deleteSavedTab(\'' + name + '\')" style="color:var(--red);cursor:pointer;padding:2px 6px">&times;</span></span></div>';
+                });
+                body.innerHTML = html;
+            }
+            overlay.classList.add('show');
+        }
+
+        function loadSavedTab(name) {
+            const saved = JSON.parse(localStorage.getItem('savedTabs') || '{}');
+            const s = saved[name];
+            if (!s) return;
+            if (s.model && s.model !== currentModel) { currentModel = s.model; document.getElementById('modelSelect').value = s.model; }
+            tabs[name] = { content: s.content, dirty: false };
+            switchTab(name);
+            closePopup('loadTabPopup');
+        }
+
+        function deleteSavedTab(name) { const saved = JSON.parse(localStorage.getItem('savedTabs') || '{}'); delete saved[name]; localStorage.setItem('savedTabs', JSON.stringify(saved)); showLoadTab(); }
+        function exitCompiler() { window.location.href = '../index.html'; }
+        function showSettings() { document.getElementById('settingsPopup').classList.add('show'); }
+        function adjFontSize(delta) { setFontSize(Math.min(40, Math.max(8, fontSize + delta))); }
+        function setFontSize(v) { const val = parseInt(v); if (isNaN(val) || val < 8 || val > 40) return; fontSize = val; document.getElementById('editor').style.fontSize = val + 'px'; document.getElementById('highlightArea').style.fontSize = val + 'px'; document.getElementById('lineNums').style.fontSize = val + 'px'; document.getElementById('fontSizeVal').textContent = val; saveState(); }
+        function setTheme(val) { currentTheme = val; document.body.className = val === 'dark' ? '' : val; document.getElementById('themeSelect').value = val; saveState(); }
+        function setTabSize(val) { tabSize = val; document.getElementById('editor').style.tabSize = val; document.getElementById('highlightArea').style.tabSize = val; saveState(); }
+        function toggleWordWrap() { wordWrap = !wordWrap; document.getElementById('wrapToggle').classList.toggle('on', wordWrap); document.getElementById('editor').classList.toggle('wrap', wordWrap); document.getElementById('highlightArea').classList.toggle('wrap', wordWrap); saveState(); }
+        function toggleLineNumbers() { lineNums = !lineNums; document.getElementById('lineToggle').classList.toggle('on', lineNums); document.getElementById('editorWrap').classList.toggle('line-numbers', lineNums); if (lineNums) updateLineNums(); else document.getElementById('lineNums').textContent = ''; saveState(); }
+        function toggleStudio() { studioMode = !studioMode; document.getElementById('mainArea').classList.toggle('split', studioMode); document.getElementById('studioBtn').classList.toggle('primary', studioMode); }
+        function clearEditor() { document.getElementById('editor').value = ''; onEditorInput(); }
+        function clearOutput() { document.getElementById('outputArea').innerHTML = ''; }
+        function copyContent() { navigator.clipboard.writeText(document.getElementById('editor').value).catch(()=>{}); }
+        function copyInput() { navigator.clipboard.writeText(document.getElementById('editor').value).catch(()=>{}); }
+        function copyOutput() { navigator.clipboard.writeText(document.getElementById('outputArea').textContent).catch(()=>{}); }
+        function onModelChange() { currentModel = document.getElementById('modelSelect').value; saveState(); }
+        function closePopup(id) { document.getElementById(id).classList.remove('show'); }
+        function insertLabel(name) { document.getElementById('editor').value += name + ' '; onEditorInput(); closePopup('labelsPopup'); }
+
+        function showLabels() {
+            const body = document.getElementById('labelsBody');
+            document.getElementById('labelsModelName').textContent = currentModel;
+            document.getElementById('labelsPopup').classList.add('show');
+            body.innerHTML = '<div style="color:var(--text2);padding:20px;text-align:center"><i class="fas fa-spinner fa-spin"></i> Đang tải...</div>';
+
+            const cb = 'labels_cb_' + Date.now();
+            window[cb] = function(data) {
+                delete window[cb];
+                document.head.removeChild(script);
+                const lines = data.split('\n').filter(l => l.trim());
+                window._labels = lines;
+                let html = '';
+                lines.forEach((line, i) => {
+                    const parts = line.trim().split(/\s+/);
+                    if (parts.length >= 2) html += '<div class="entry" onclick="insertLabelByIndex(' + i + ')"><span>' + parts.slice(1).join(' ') + '</span><span class="addr">' + parts[0] + '</span></div>';
+                });
+                body.innerHTML = html || '<div style="color:var(--text2);padding:12px">Không có labels</div>';
+            };
+            let script = document.createElement('script');
+            script.src = SERVER + '/raw-file/' + currentModel + '/labels.txt?callback=' + cb;
+            document.head.appendChild(script);
+        }
+
+        function insertLabelByIndex(idx) {
+            const line = window._labels[idx];
+            if (!line) return;
+            const parts = line.trim().split(/\s+/);
+            insertLabel(parts.slice(1).join(' '));
+        }
+
+        function showSamples() {
+            const body = document.getElementById('samplesBody');
+            document.getElementById('samplesModelName').textContent = currentModel;
+            document.getElementById('samplesPopup').classList.add('show');
+            body.innerHTML = '<div style="color:var(--text2);padding:20px;text-align:center"><i class="fas fa-spinner fa-spin"></i> Đang tải...</div>';
+
+            const cb = 'samples_cb_' + Date.now();
+            window[cb] = function(files) {
+                delete window[cb];
+                document.head.removeChild(script);
+                if (files.length === 0) { body.innerHTML = '<div style="color:var(--text2);padding:12px">Không có mẫu ASM</div>'; return; }
+                body.innerHTML = files.map((f, i) =>
+                    '<div class="entry" onclick="loadSample(' + i + ')">' +
+                    '<span><i class="fas fa-file-code"></i> ' + f.name + '</span>' +
+                    '<span style="color:var(--text2)">' + f.content.split('\n').length + ' dòng</span></div>'
+                ).join('');
+                window._samples = files;
+            };
+            let script = document.createElement('script');
+            script.src = SERVER + '/samples/' + currentModel + '?callback=' + cb;
+            document.head.appendChild(script);
+        }
+
+        function loadSample(idx) {
+            const f = window._samples[idx];
+            if (!f) return;
+            if (!tabs[f.name]) tabs[f.name] = { content: '', dirty: false };
+            tabs[f.name].content = f.content;
+            switchTab(f.name);
+            closePopup('samplesPopup');
+        }
+
+        function compileCode() {
+            saveCurrentContent();
+            const code = tabs[currentTab]?.content || document.getElementById('editor').value;
+            const out = document.getElementById('outputArea');
+            out.innerHTML = '<div style="color:var(--text2)">Đang biên dịch...</div>';
+
+            const cb = 'comp_cb_' + Date.now();
+
+            // Listen for postMessage from iframe
+            function handler(e) {
+                const msg = JSON.parse(e.data);
+                if (msg.cb === cb) {
+                    window.removeEventListener('message', handler);
+                    const iframe = document.querySelector('iframe[name="compFrame"]');
+                    if (iframe) document.body.removeChild(iframe);
+                    const data = msg.data;
+                    if (data.error) { out.innerHTML = '<div class="error">' + data.error + '</div>'; }
+                    else if (data.returncode !== 0) { out.innerHTML = '<div class="warn">' + ((data.notes || '') + (data.output ? '\n' + data.output : '')) + '</div>'; }
+                    else {
+                        let html = '';
+                        if (data.notes) html += '<div class="warn" style="border-bottom:1px solid var(--border);padding-bottom:8px;margin-bottom:8px">' + data.notes + '</div>';
+                        if (data.output) html += data.output.split('\n').map(l => { const m = l.match(/^([0-9A-Fa-f]{4})\b(.*)/); if (m) return '<div><span class="addr">' + m[1] + '</span><span class="hex">' + m[2] + '</span></div>'; return '<div>' + l + '</div>'; }).join('');
+                        else html += '<div class="success">Biên dịch thành công!</div>';
+                        out.innerHTML = html;
+                    }
+                }
+            }
+            window.addEventListener('message', handler);
+
+            const iframe = document.createElement('iframe');
+            iframe.name = 'compFrame';
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
+
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = SERVER + '/compile';
+            form.target = 'compFrame';
+
+            const inp = document.createElement('input');
+            inp.type = 'hidden';
+            inp.name = 'data';
+            inp.value = JSON.stringify({ code: code, model: currentModel, cb: cb });
+            form.appendChild(inp);
+
+            document.body.appendChild(form);
+            form.submit();
+            setTimeout(() => { if (form.parentNode) document.body.removeChild(form); }, 100);
+        }
+
+        function saveState() { try { localStorage.setItem('comp_fontSize', fontSize); localStorage.setItem('comp_theme', currentTheme); localStorage.setItem('comp_tabSize', tabSize); localStorage.setItem('comp_wrap', wordWrap); localStorage.setItem('comp_lineNums', lineNums); localStorage.setItem('comp_model', currentModel); } catch(e) {} }
+        function loadState() {
+            try {
+                const fs = localStorage.getItem('comp_fontSize'); if (fs) setFontSize(parseInt(fs)); else document.getElementById('fontSizeVal').textContent = fontSize;
+                const th = localStorage.getItem('comp_theme'); if (th) setTheme(th);
+                const ts = localStorage.getItem('comp_tabSize'); if (ts) { tabSize = parseInt(ts); document.getElementById('tabSizeSelect').value = ts; document.getElementById('editor').style.tabSize = ts; document.getElementById('highlightArea').style.tabSize = ts; }
+                const wr = localStorage.getItem('comp_wrap'); wordWrap = wr === 'true'; document.getElementById('wrapToggle').classList.toggle('on', wordWrap); document.getElementById('editor').classList.toggle('wrap', wordWrap); document.getElementById('highlightArea').classList.toggle('wrap', wordWrap);
+                const ln = localStorage.getItem('comp_lineNums'); lineNums = ln !== 'false'; document.getElementById('lineToggle').classList.toggle('on', lineNums); document.getElementById('editorWrap').classList.toggle('line-numbers', lineNums);
+                const md = localStorage.getItem('comp_model'); if (md) { currentModel = md; document.getElementById('modelSelect').value = md; }
+            } catch(e) {}
+        }
+    </script>
+</body>
+</html>
