@@ -85,39 +85,74 @@ class Handler(BaseHTTPRequestHandler):
             callback = data.get("cb", "cb")
 
             try:
-                env = os.environ.copy()
-                env["PYTHONIOENCODING"] = "utf-8"
-                env["PYTHONUNBUFFERED"] = "1"
+                # Import compiler modules
+                from libcompiler import loader, handlers, utils, engine, extensions
 
-                with tempfile.NamedTemporaryFile(suffix=".rsc", delete=False, dir=BASE_DIR) as tmp:
-                    tmp.write(code.encode("utf-8"))
-                    tmp_name = tmp.name
+                # Reset state
+                loader.labels.clear()
+                loader.global_labels.clear()
+                loader.section_addresses.clear()
+                loader.label_sections.clear()
+                loader.aliases.clear()
+                loader.result.clear()
+                loader.vars_dict.clear()
+                loader.commands.clear()
+                loader.datalabels.clear()
+                loader.disasm.clear()
+                loader.deferred_evals.clear()
+                loader.address_requests.clear()
+                loader.relocation_expressions.clear()
+                loader.sizeof_cmds.clear()
+                loader.dist_cmds.clear()
+                loader.pr_org_cmds.clear()
+                loader.pr_backup_cmds.clear()
+                loader.dynamic_macros.clear()
+                loader.defined_functions.clear()
+                utils._default_diagnostics.reset()
 
-                from libcompiler import main as compiler_main
-                import io
-                old_stdout = sys.stdout
-                sys.stdout = io.StringIO()
+                # Load config
+                config_path = os.path.join(BASE_DIR, model, "config.json")
+                with open(config_path, "r", encoding="utf-8") as f:
+                    config = json.load(f)
+
+                # Load keywords
+                kw_path = os.path.join(BASE_DIR, "libcompiler", "keyword.txt")
+                if os.path.exists(kw_path):
+                    with open(kw_path, "r", encoding="utf-8") as f:
+                        utils.setKeywords(f.read().splitlines())
+
+                # Load model files
+                gadgets_path = os.path.join(BASE_DIR, model, config["gadgets_file"])
+                labels_path = os.path.join(BASE_DIR, model, config["labels_file"])
+                with open(gadgets_path, "r", encoding="utf-8") as f:
+                    gadgets_text = f.read()
+                with open(labels_path, "r", encoding="utf-8") as f:
+                    labels_text = f.read()
+
+                loader.char_to_hex.update(config.get("char_to_hex", {}))
+                loader.token_to_hex.update(config.get("token_to_hex", {}))
+                handlers.init_handlers()
+                loader.parse_commands(gadgets_text, labels_text)
+
+                # Parse extensions
+                ext_path = os.path.join(BASE_DIR, model, config.get("extensions_file", "extensions.txt"))
+                ext_list = []
+                if os.path.exists(ext_path):
+                    with open(ext_path, "r", encoding="utf-8") as f:
+                        ext_list = extensions.parse_extensions(f.read())
+
+                # Expand extensions in code
+                program = extensions.expand_extensions_in_program(code.split('\n'), ext_list)
 
                 # Run compiler
-                sys.argv = ["rac.py", "-l", "vi_VN", model, os.path.basename(tmp_name)]
-                try:
-                    compiler_main.main()
-                except SystemExit:
-                    pass
+                overflow_sp = config["overflow_initial_sp"]
+                results = engine.process_program(program, overflow_sp)
 
-                output = sys.stdout.getvalue()
-                sys.stdout = old_stdout
-
-                try:
-                    os.remove(tmp_name)
-                except:
-                    pass
-
+                output = results.get("output", "")
                 response = {"output": output, "notes": "", "returncode": 0, "bytes_count": len(output.split()) if output else 0}
             except Exception as e:
-                response = {"error": str(e)}
-                try: os.remove(tmp_name)
-                except: pass
+                import traceback
+                response = {"error": traceback.format_exc()}
 
             html = '<html><body><script>window.parent.postMessage(JSON.stringify({cb:"' + callback + '",data:' + json.dumps(response) + '}),"*");</script></body></html>'
             self.send_response(200)
