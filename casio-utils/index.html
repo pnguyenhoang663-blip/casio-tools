@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tiện ích Casio</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',sans-serif;background:#f5f5f5;color:#333;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+h2{color:#007acc;margin-bottom:8px;padding:16px 24px 0}
+.sub{color:#888;font-size:13px;padding:0 24px;margin-bottom:12px}
+.bar{display:flex;align-items:center;justify-content:space-between;padding:8px 24px;background:#e8e8e8;border-top:1px solid #ddd;font-size:12px;color:#666;margin-top:auto}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;padding:0 24px 24px}
+.card{border:1px solid #ddd;border-radius:10px;padding:24px;text-align:center;cursor:pointer;transition:all .2s;background:#fff}
+.card:hover{border-color:#007acc;box-shadow:0 2px 12px rgba(0,122,204,0.1);transform:translateY(-2px)}
+.card i{font-size:32px;color:#007acc;display:block;margin-bottom:8px}
+.card .nm{font-size:14px;font-weight:600;color:#333}
+.card .ds{font-size:11px;color:#888;margin-top:4px}
+</style>
+</head>
+<body>
+<h2><i class="fas fa-cube"></i> Tiện ích Casio <span style="font-size:12px;color:#888;cursor:pointer;float:right;padding-right:24px" onclick="window.location.href='../index.html'"><i class="fas fa-times"></i> Thoát</span></h2>
+<p class="sub">Các tiện ích dành cho Casio</p>
+<div class="cards">
+  <div class="card" onclick="alert('Sắp ra mắt')">
+    <i class="fas fa-calculator"></i>
+    <div class="nm">Tính toán</div>
+    <div class="ds">Sắp ra mắt</div>
+  </div>
+  <div class="card" onclick="alert('Sắp ra mắt')">
+    <i class="fas fa-exchange-alt"></i>
+    <div class="nm">Chuyển đổi</div>
+    <div class="ds">Sắp ra mắt</div>
+  </div>
+  <div class="card" onclick="alert('Sắp ra mắt')">
+    <i class="fas fa-info-circle"></i>
+    <div class="nm">Thông tin</div>
+    <div class="ds">Sắp ra mắt</div>
+  </div>
+</div>
+<div class="bar"><span>Tiện ích Casio</span><span>Bởi server Hack casio</span></div>
+</body>
+</html>
