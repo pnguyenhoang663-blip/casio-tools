@@ -79,10 +79,11 @@ function dich() {
   const results = [];
   
   for (const hex of hexes) {
-    const upper = hex.toUpperCase();
+    const clean = hex.replace(/[<>]/g, '');
+    const upper = clean.toUpperCase();
     if (tokens[upper]) results.push(tokens[upper]);
-    else if (tokens[hex]) results.push(tokens[hex]);
-    else results.push('<' + hex.toLowerCase() + '>');
+    else if (tokens[clean]) results.push(tokens[clean]);
+    else results.push('<' + clean.toLowerCase() + '>');
   }
   
   document.getElementById('outputText').value = results.join(' ');
