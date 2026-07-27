@@ -79,11 +79,9 @@ function dich() {
   const results = [];
   
   for (const hex of hexes) {
-    const clean = hex.replace(/[<>]/g, '');
-    const upper = clean.toUpperCase();
-    if (tokens[upper]) results.push(tokens[upper]);
-    else if (tokens[clean]) results.push(tokens[clean]);
-    else results.push('<' + clean.toLowerCase() + '>');
+    const clean = hex.replace(/[<>]/g, '').toLowerCase();
+    if (tokens[clean]) results.push(tokens[clean]);
+    else results.push('<' + clean + '>');
   }
   
   document.getElementById('outputText').value = results.join(' ');
