@@ -75,13 +75,27 @@ function dich() {
   if (!input) return;
   
   const tokens = model === '580vnx' ? T580 : T880;
-  const hexes = input.split(/\s+/).filter(h => h);
-  const results = [];
+  const parts = input.split(/\s+/).filter(h => h);
+  const hexes = [];
   
-  for (const hex of hexes) {
-    const clean = hex.replace(/[<>]/g, '').toLowerCase();
-    if (tokens[clean]) results.push(tokens[clean]);
-    else results.push('<' + clean + '>');
+  // Merge fe/fd with next byte
+  for (let i = 0; i < parts.length; i++) {
+    const p = parts[i].replace(/[<>]/g, '').toLowerCase();
+    if ((p === 'fe' || p === 'fd') && i + 1 < parts.length) {
+      const next = parts[i + 1].replace(/[<>]/g, '').toLowerCase();
+      if (/^[0-9a-f]{2}$/.test(next)) {
+        hexes.push(p + next);
+        i++;
+        continue;
+      }
+    }
+    hexes.push(p);
+  }
+  
+  const results = [];
+  for (const h of hexes) {
+    if (tokens[h]) results.push(tokens[h]);
+    else results.push('<' + h + '>');
   }
   
   document.getElementById('outputText').value = results.join(' ');
