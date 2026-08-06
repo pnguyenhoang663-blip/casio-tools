@@ -249,7 +249,9 @@
         function onEditorInput() {
             const val = document.getElementById('editor').value;
             tabs[currentTab].content = val; tabs[currentTab].dirty = true;
-            renderTabs(); updateLineNums(); highlightCode(val); pushHistory(val);
+            renderTabs(); updateLineNums(); pushHistory(val);
+            clearTimeout(window._hlTimer);
+            window._hlTimer = setTimeout(() => highlightCode(val), 120);
         }
 
         function updateLineNums() {
